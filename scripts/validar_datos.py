@@ -21,6 +21,46 @@ REQUIRED = {
     "diagnostico.csv": {"control_id", "nivel_madurez", "evidencia", "entrevistado", "fecha", "observaciones"},
     "proyectos.csv": {"proyecto_id", "titulo", "plazo", "esfuerzo_jornadas", "aporte_seguridad", "descripcion", "dependencias"},
     "proyecto_control.csv": {"proyecto_id", "control_id"},
+    "entrevistas.csv": {"entrevista_id", "nombre", "area", "empresa", "cargo"},
+}
+
+ISO_27002_2022_CHAPTER_COUNTS = {
+    "5 - Controles Organizativos": 37,
+    "6 - Controles de Personas": 8,
+    "7 - Controles Físicos": 14,
+    "8 - Controles Tecnológicos": 34,
+}
+
+EXTENDED_CATALOG_COLUMNS = {
+    "proposito",
+    "tipo_preventivo",
+    "tipo_detectivo",
+    "tipo_correctivo",
+    "prop_confidencialidad",
+    "prop_integridad",
+    "prop_disponibilidad",
+    "func_identificacion",
+    "func_proteccion",
+    "func_deteccion",
+    "func_respuesta",
+    "func_recuperacion",
+    "tipo_seguridad",
+    "proyecto_sugerido",
+    "plazo_sugerido",
+}
+
+BINARY_CATALOG_COLUMNS = {
+    "tipo_preventivo",
+    "tipo_detectivo",
+    "tipo_correctivo",
+    "prop_confidencialidad",
+    "prop_integridad",
+    "prop_disponibilidad",
+    "func_identificacion",
+    "func_proteccion",
+    "func_deteccion",
+    "func_respuesta",
+    "func_recuperacion",
 }
 
 
@@ -40,6 +80,20 @@ def validate_standard(standard_dir: Path) -> tuple[pd.DataFrame, set[int]]:
 
     if catalogo["control_id"].duplicated().any():
         raise ValueError(f"{standard_dir}: control_id duplicado")
+    missing_extended = EXTENDED_CATALOG_COLUMNS - set(catalogo.columns)
+    if missing_extended:
+        raise ValueError(f"{standard_dir}: catalogo sin columnas extendidas {sorted(missing_extended)}")
+
+    if standard_dir.name == "iso27002_2022":
+        counts = catalogo.groupby("capitulo")["control_id"].nunique().to_dict()
+        if counts != ISO_27002_2022_CHAPTER_COUNTS:
+            raise ValueError(f"{standard_dir}: distribucion ISO 27002:2022 inesperada {counts}")
+
+    for column in BINARY_CATALOG_COLUMNS & set(catalogo.columns):
+        values = pd.to_numeric(catalogo[column], errors="coerce").dropna()
+        invalid = set(values.astype(int)) - {0, 1}
+        if invalid:
+            raise ValueError(f"{standard_dir}: {column} debe ser binario 0/1")
 
     madurez["nivel"] = madurez["nivel"].astype(int)
     levels = set(madurez["nivel"])
@@ -65,8 +119,12 @@ def validate_company(company_dir: Path, standards_dir: Path) -> None:
     diagnostico = read_csv(company_dir / "diagnostico.csv")
     proyectos = read_csv(company_dir / "proyectos.csv")
     proyecto_control = read_csv(company_dir / "proyecto_control.csv")
+    entrevistas_path = company_dir / "entrevistas.csv"
+    entrevistas = read_csv(entrevistas_path) if entrevistas_path.exists() else pd.DataFrame()
 
     diag_controls = set(diagnostico["control_id"].astype(str))
+    if diagnostico["control_id"].duplicated().any():
+        raise ValueError(f"{company_dir}: diagnostico tiene controles duplicados")
     unknown_diag = diag_controls - known_controls
     if unknown_diag:
         raise ValueError(f"{company_dir}: diagnostico referencia controles inexistentes {sorted(unknown_diag)}")
@@ -84,6 +142,17 @@ def validate_company(company_dir: Path, standards_dir: Path) -> None:
     unknown_controls = set(proyecto_control["control_id"].astype(str)) - known_controls
     if unknown_controls:
         raise ValueError(f"{company_dir}: proyecto_control referencia controles inexistentes {sorted(unknown_controls)}")
+
+    if company_dir.name == "ejemplo":
+        missing_diag = known_controls - diag_controls
+        if len(diagnostico) != 93 or missing_diag:
+            raise ValueError(f"{company_dir}: ejemplo debe cubrir los 93 controles ISO, faltan {sorted(missing_diag)}")
+        if len(entrevistas) != 7:
+            raise ValueError(f"{company_dir}: ejemplo debe conservar 7 entrevistas de la fuente")
+        if len(proyectos) != 45:
+            raise ValueError(f"{company_dir}: ejemplo debe conservar 45 proyectos de referencia")
+        if len(proyecto_control) != 93:
+            raise ValueError(f"{company_dir}: ejemplo debe conservar 93 vinculos control-proyecto")
 
 
 def main() -> int:

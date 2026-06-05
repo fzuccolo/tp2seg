@@ -1,5 +1,0 @@
-activo_id,tipo,nombre,criticidad_cid,propietario,proceso
-PN-01,Proceso,Servicio digital principal,4,Responsable Demo,Operacion
-DI-01,Informacion,Datos de clientes demo,4,Responsable Demo,Operacion
-AP-01,Aplicacion,Portal demo,4,Responsable Demo,Operacion
-SV-01,Servidor,Base demo,3,Responsable Demo,Operacion

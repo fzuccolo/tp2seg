@@ -39,6 +39,12 @@ def read_csv(path: Path) -> pd.DataFrame:
     return pd.read_csv(path, dtype={"control_id": str, "proyecto_id": str})
 
 
+def read_optional_csv(path: Path) -> pd.DataFrame:
+    if not path.exists():
+        return pd.DataFrame()
+    return read_csv(path)
+
+
 def load_dataset(empresa_id: str | None = None, root: Path | None = None) -> dict[str, Any]:
     base = root or ROOT
     config = load_config(base)
@@ -60,4 +66,5 @@ def load_dataset(empresa_id: str | None = None, root: Path | None = None) -> dic
         "diagnostico": read_csv(empresa_dir / "diagnostico.csv"),
         "proyectos": read_csv(empresa_dir / "proyectos.csv"),
         "proyecto_control": read_csv(empresa_dir / "proyecto_control.csv"),
+        "entrevistas": read_optional_csv(empresa_dir / "entrevistas.csv"),
     }

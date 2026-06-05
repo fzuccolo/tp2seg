@@ -1,0 +1,3 @@
+activo_id,tipo,nombre,criticidad_cid,propietario,proceso
+ORG-01,Organizacion,Banco de Buenos Aires S.A.,5,CISO,Sistema de Gestion de Seguridad de la Informacion
+PR-01,Proceso,Gestion estrategica de seguridad,5,CISO,Plan estrategico de seguridad

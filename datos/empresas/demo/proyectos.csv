@@ -1,4 +1,0 @@
-proyecto_id,titulo,plazo,esfuerzo_jornadas,aporte_seguridad,descripcion,dependencias
-DM-01,Mejora de segregacion,Corto,8,0.25,Ajustar roles y responsabilidades,
-DM-02,Automatizacion de monitoreo,Medio,12,0.35,Mejorar alertas y revision de logs,DM-01
-DM-03,Fortalecimiento SDLC,Medio,10,0.20,Mejorar pruebas y codificacion segura,DM-01

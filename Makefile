@@ -1,6 +1,6 @@
-PYTHON ?= python3
+PYTHON ?= $(shell if [ -x .venv/bin/python ]; then printf ".venv/bin/python"; else printf "python3"; fi)
 
-.PHONY: validate build test app ci
+.PHONY: validate build test app import-example ci
 
 validate:
 	$(PYTHON) scripts/validar_datos.py
@@ -12,6 +12,9 @@ test:
 	$(PYTHON) -m pytest
 
 app:
-	streamlit run app/app.py
+	$(PYTHON) -m streamlit run app/app.py
+
+import-example:
+	$(PYTHON) scripts/importar_ejemplo.py
 
 ci: validate test build

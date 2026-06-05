@@ -22,6 +22,11 @@ slides/     Presentacion Quarto por empresa
 salidas/    Archivos generados
 ```
 
+## Empresas
+
+- `ejemplo`: dataset importado desde el trabajo de referencia G1 para calibrar el formato, el tablero y los graficos.
+- `tecnohogar`: caso principal del TP2; hoy conserva datos semilla y se completa en la siguiente etapa.
+
 ## Uso local
 
 Crear un entorno e instalar dependencias:
@@ -50,6 +55,12 @@ Ejecutar tests:
 make test
 ```
 
+Reimportar el caso ejemplo desde los Excel de la catedra:
+
+```bash
+make import-example
+```
+
 Levantar el tablero:
 
 ```bash
@@ -61,9 +72,15 @@ make app
 Luego de `make build`, las salidas quedan en:
 
 ```text
-salidas/tecnohogar/
+salidas/<empresa>/
   metricas.csv
   capitulos.csv
+  madurez_distribucion.csv
+  matriz_madurez.csv
+  capacidad_operacional.csv
+  ciberfunciones.csv
+  proyectos_por_plazo.csv
+  proyectos_por_tipo.csv
   proyectos_priorizados.csv
   resumen.json
   informe/informe.html
@@ -93,7 +110,7 @@ Cuando el repo privado este conectado a Streamlit, los pushes a `main` actualiza
 
 ## Base academica
 
-Esta primera version usa una seleccion reducida de controles ISO/IEC 27002:2022 y escala CMMI, siguiendo la forma del material de catedra:
+Esta version usa los 93 controles ISO/IEC 27002:2022 trabajados en el material de catedra y escala CMMI:
 
 - TP2: tablero, metricas, graficos, presentacion e informe.
 - Clase GESI-C6: metricas, KPIs, tablero y plan de acciones.
