@@ -1,0 +1,11 @@
+activo_id,tipo,nombre,criticidad_cid,propietario,proceso
+PN-01,Proceso,Venta Online,5,Juan Castillo,Venta Online
+PN-02,Proceso,Gestion de Pagos,5,Laura Mendez,Gestion de Pagos
+PN-03,Proceso,Logistica y Despacho,4,Juan Castillo,Logistica y Despacho
+DI-01,Informacion,Datos personales de clientes,5,Juan Castillo,Venta Online
+DI-02,Informacion,Datos de pago y tarjetas,5,Laura Mendez,Gestion de Pagos
+DI-04,Informacion,Stock e inventario,4,Juan Castillo,Gestion de Catalogo y Stock
+DI-08a,Informacion,Legajos digitales del personal,4,Susana Ortiz,Gestion de Personal
+AP-01,Aplicacion,Plataforma e-commerce,5,Diego Sosa,Venta Online
+AP-02,Aplicacion,Gateway de pagos,5,Diego Sosa,Gestion de Pagos
+SV-01,Servidor,Base de datos transaccional,5,Diego Sosa,Venta Online

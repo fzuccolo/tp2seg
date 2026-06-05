@@ -1,0 +1,33 @@
+---
+title: "TP2 - Tablero de Control de Seguridad"
+subtitle: "TecnoHogar S.A."
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    chalkboard: false
+execute:
+  echo: false
+---
+
+## Caso
+
+- Empresa ficticia de e-commerce de electrodomesticos.
+- Continuidad con el inventario del TP1.
+- Evaluacion basada en ISO/IEC 27002:2022.
+- Madurez calculada con escala CMMI.
+
+## Diagnostico
+
+{{< include ../../salidas/tecnohogar/resumen_slides.md >}}
+
+## Tablero
+
+- Vista global de madurez por capitulo.
+- Top brechas por control.
+- Proyectos priorizados por brecha asociada y aporte de seguridad.
+- Descarga de metricas para trazabilidad.
+
+## Cierre
+
+La siguiente etapa es reemplazar datos de juguete por diagnostico final, evidencias, pesos revisados y plan de mejora defendible.

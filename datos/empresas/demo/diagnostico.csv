@@ -1,0 +1,26 @@
+control_id,nivel_madurez,evidencia,entrevistado,fecha,observaciones
+5.1,4,Politicas aprobadas y revisadas,Demo Sec,2026-06-04,Dataset de prueba
+5.2,4,Roles definidos,Demo Sec,2026-06-04,Dataset de prueba
+5.3,3,Separacion parcial,Demo Ops,2026-06-04,Dataset de prueba
+5.7,3,Boletines revisados,Demo Ops,2026-06-04,Dataset de prueba
+5.9,4,Inventario actualizado,Demo Ops,2026-06-04,Dataset de prueba
+5.12,4,Clasificacion documentada,Demo Sec,2026-06-04,Dataset de prueba
+5.15,3,Accesos definidos,Demo Sec,2026-06-04,Dataset de prueba
+5.19,3,Proveedores evaluados,Demo Sec,2026-06-04,Dataset de prueba
+5.23,3,Cloud documentado,Demo Ops,2026-06-04,Dataset de prueba
+5.24,3,Runbook inicial,Demo Ops,2026-06-04,Dataset de prueba
+5.30,3,Continuidad definida,Demo Ops,2026-06-04,Dataset de prueba
+6.3,4,Capacitacion anual,Demo HR,2026-06-04,Dataset de prueba
+6.6,4,NDA vigente,Demo HR,2026-06-04,Dataset de prueba
+7.4,3,Control fisico documentado,Demo Ops,2026-06-04,Dataset de prueba
+7.9,3,Politica de equipos,Demo Ops,2026-06-04,Dataset de prueba
+8.2,3,Privilegios revisados,Demo Sec,2026-06-04,Dataset de prueba
+8.5,4,MFA extendido,Demo Sec,2026-06-04,Dataset de prueba
+8.8,3,Escaneos mensuales,Demo Sec,2026-06-04,Dataset de prueba
+8.13,4,Backups probados,Demo Ops,2026-06-04,Dataset de prueba
+8.15,3,Logs centralizados,Demo Sec,2026-06-04,Dataset de prueba
+8.16,3,Alertas basicas,Demo Sec,2026-06-04,Dataset de prueba
+8.20,3,Red segmentada,Demo Ops,2026-06-04,Dataset de prueba
+8.25,3,SDLC definido,Demo Dev,2026-06-04,Dataset de prueba
+8.28,3,Guia de codigo,Demo Dev,2026-06-04,Dataset de prueba
+8.29,3,Pruebas antes de release,Demo Dev,2026-06-04,Dataset de prueba

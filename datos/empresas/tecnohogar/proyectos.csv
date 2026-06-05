@@ -1,0 +1,9 @@
+proyecto_id,titulo,plazo,esfuerzo_jornadas,aporte_seguridad,descripcion,dependencias
+PR-01,Marco normativo y gobierno SGSI,Corto,18,0.16,Formalizar politicas roles RACI y gobierno de seguridad,
+PR-02,IAM MFA y revision de privilegios,Corto,24,0.18,Implantar MFA y proceso periodico de revision de accesos,PR-01
+PR-03,Gestion de vulnerabilidades y pruebas,Medio,30,0.17,Definir escaneos remediacion y pruebas de seguridad recurrentes,PR-01
+PR-04,SIEM logs y monitoreo,Medio,28,0.15,Centralizar logs definir alertas y monitoreo de eventos criticos,PR-01
+PR-05,Continuidad backups y restauracion,Corto,20,0.12,Probar restauracion y definir continuidad de servicios TIC,PR-01
+PR-06,Seguridad en desarrollo y WAF,Medio,26,0.12,Integrar controles de seguridad al SDLC y proteger e-commerce,PR-03
+PR-07,Proteccion de datos personales y PCI-DSS,Medio,22,0.10,Alinear datos personales y pagos a requisitos legales y contractuales,PR-01
+PR-08,Concientizacion y respuesta a incidentes,Corto,16,0.10,Capacitar usuarios y formalizar gestion de incidentes,PR-01

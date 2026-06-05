@@ -1,0 +1,40 @@
+---
+title: "Informe TP2 - Tablero de Control de Seguridad"
+subtitle: "TecnoHogar S.A."
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    theme: cosmo
+execute:
+  echo: false
+---
+
+# Objetivo
+
+Este informe presenta una primera version reproducible del diagnostico de seguridad de TecnoHogar S.A. La evaluacion usa una seleccion de controles ISO/IEC 27002:2022 y una escala de madurez CMMI.
+
+# Alcance
+
+El alcance inicial cubre controles organizativos, de personas, fisicos y tecnologicos. La empresa evaluada es ficticia y deriva del inventario realizado en el TP1.
+
+# Resultados
+
+{{< include ../../salidas/tecnohogar/resumen_informe.md >}}
+
+# Criterio de madurez
+
+La madurez se calcula con una escala de 0 a 5:
+
+- 0 Inexistente
+- 1 Inicial
+- 2 Gestionado
+- 3 Definido
+- 4 Cuantitativo
+- 5 Optimizado
+
+El porcentaje global pondera cada control por su peso relativo y calcula la brecha restante respecto del valor maximo.
+
+# Proximos pasos
+
+Esta version debe reemplazar los datos de juguete por evidencias mas completas, ajustar pesos, priorizar controles relevantes para e-commerce y completar la narrativa del plan de seguridad.

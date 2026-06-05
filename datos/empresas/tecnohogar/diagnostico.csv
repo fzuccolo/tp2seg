@@ -1,0 +1,26 @@
+control_id,nivel_madurez,evidencia,entrevistado,fecha,observaciones
+5.1,2,Politicas parciales sin ciclo formal de revision,Diego Sosa,2026-06-04,Falta aprobacion y publicacion unificada
+5.2,2,Roles de TI definidos informalmente,Diego Sosa,2026-06-04,No hay RACI de seguridad
+5.3,1,Permisos concentrados en administradores historicos,Laura Mendez,2026-06-04,Riesgo en pagos y conciliacion
+5.7,1,No hay fuente formal de inteligencia de amenazas,Diego Sosa,2026-06-04,Se consulta informacion de forma reactiva
+5.9,4,Inventario TP1 disponible y actualizado,Juan Castillo,2026-06-04,Debe mantenerse como proceso
+5.12,3,Clasificacion CID realizada para informacion critica,Juan Castillo,2026-06-04,Falta extender a documentos operativos
+5.15,2,Reglas de acceso dispersas por aplicacion,Diego Sosa,2026-06-04,Falta politica comun de acceso
+5.19,2,Contratos con proveedores sin anexo de seguridad uniforme,Laura Mendez,2026-06-04,Priorizar gateway de pagos y cloud
+5.23,2,Uso cloud operativo sin gobierno documentado,Diego Sosa,2026-06-04,Falta inventario de servicios cloud
+5.24,1,Incidentes tratados por canal informal,Diego Sosa,2026-06-04,Falta proceso de respuesta
+5.30,2,Backups existentes con pruebas incompletas,Diego Sosa,2026-06-04,Falta plan de continuidad integral
+6.3,1,Capacitaciones no periodicas,Susana Ortiz,2026-06-04,Falta programa anual
+6.6,3,NDA incluido en contratos principales,Susana Ortiz,2026-06-04,Falta validar terceros
+7.4,2,Control fisico basico en oficinas y centros,Juan Castillo,2026-06-04,Falta revision periodica
+7.9,2,Notebooks con proteccion parcial,Diego Sosa,2026-06-04,Falta cifrado y hardening uniforme
+8.2,1,Cuentas privilegiadas sin revision formal,Diego Sosa,2026-06-04,Prioridad alta
+8.5,2,MFA parcial en servicios criticos,Diego Sosa,2026-06-04,Extender a administradores y usuarios sensibles
+8.8,1,Escaneos no sistematicos,Diego Sosa,2026-06-04,Falta proceso de remediacion
+8.13,3,Backups diarios configurados,Diego Sosa,2026-06-04,Faltan pruebas documentadas de restauracion
+8.15,2,Logs disponibles pero sin retencion y revision centralizada,Diego Sosa,2026-06-04,Base para SIEM
+8.16,1,Monitoreo reactivo sin alertas consistentes,Diego Sosa,2026-06-04,Priorizar comercio electronico
+8.20,2,Redes segmentadas parcialmente,Diego Sosa,2026-06-04,Falta revision de reglas
+8.25,2,Desarrollo con revisiones funcionales,Diego Sosa,2026-06-04,Falta seguridad desde requisitos
+8.28,1,No hay guia formal de codificacion segura,Diego Sosa,2026-06-04,Integrar a equipo de desarrollo
+8.29,1,Pentest puntual no periodico,Diego Sosa,2026-06-04,Falta calendario de pruebas

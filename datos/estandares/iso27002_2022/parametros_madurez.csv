@@ -1,0 +1,7 @@
+nivel,nombre,valor
+0,Inexistente,0.00
+1,Inicial,0.05
+2,Gestionado,0.15
+3,Definido,0.60
+4,Cuantitativo,0.85
+5,Optimizado,1.00

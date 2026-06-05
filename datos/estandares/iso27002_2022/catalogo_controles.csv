@@ -1,0 +1,26 @@
+control_id,capitulo,control_nombre,pregunta,aplica,peso
+5.1,5 - Controles Organizativos,Politicas de seguridad de la informacion,Existen politicas de seguridad aprobadas y comunicadas,1,1.2
+5.2,5 - Controles Organizativos,Roles y responsabilidades de seguridad,Estan definidos los roles y responsabilidades de seguridad,1,1.1
+5.3,5 - Controles Organizativos,Segregacion de tareas,Hay separacion de funciones para procesos criticos,1,1.0
+5.7,5 - Controles Organizativos,Inteligencia de amenazas,Se recopila y analiza informacion de amenazas,1,1.0
+5.9,5 - Controles Organizativos,Inventario de informacion y activos,Existe inventario actualizado de informacion y activos asociados,1,1.3
+5.12,5 - Controles Organizativos,Clasificacion de la informacion,La informacion esta clasificada por confidencialidad integridad y disponibilidad,1,1.2
+5.15,5 - Controles Organizativos,Control de acceso,Hay reglas de control de acceso alineadas al negocio,1,1.4
+5.19,5 - Controles Organizativos,Seguridad en relaciones con proveedores,Se gestionan requisitos de seguridad con proveedores,1,1.0
+5.23,5 - Controles Organizativos,Seguridad para uso de servicios cloud,Se gobierna el uso de servicios cloud,1,1.0
+5.24,5 - Controles Organizativos,Planificacion de incidentes,Existe proceso de preparacion y gestion de incidentes,1,1.3
+5.30,5 - Controles Organizativos,Preparacion para continuidad TIC,Se planifica continuidad para servicios TIC criticos,1,1.2
+6.3,6 - Controles de Personas,Concientizacion y capacitacion,El personal recibe concientizacion en seguridad,1,1.0
+6.6,6 - Controles de Personas,Acuerdos de confidencialidad,Existen acuerdos de confidencialidad segun el rol,1,0.8
+7.4,7 - Controles Fisicos,Monitoreo de seguridad fisica,Se monitorean accesos fisicos a areas criticas,1,0.8
+7.9,7 - Controles Fisicos,Seguridad de activos fuera de instalaciones,Se protegen activos usados fuera de instalaciones,1,0.7
+8.2,8 - Controles Tecnologicos,Derechos de acceso privilegiado,Se gestionan y revisan privilegios administrativos,1,1.5
+8.5,8 - Controles Tecnologicos,Autenticacion segura,Se aplican mecanismos de autenticacion segura,1,1.5
+8.8,8 - Controles Tecnologicos,Gestion de vulnerabilidades tecnicas,Se identifican priorizan y remedian vulnerabilidades,1,1.4
+8.13,8 - Controles Tecnologicos,Backup de informacion,Existen backups probados para informacion critica,1,1.4
+8.15,8 - Controles Tecnologicos,Registro de eventos,Se generan protegen y revisan logs de seguridad,1,1.3
+8.16,8 - Controles Tecnologicos,Monitoreo de actividades,Se monitorean eventos relevantes de seguridad,1,1.3
+8.20,8 - Controles Tecnologicos,Seguridad de redes,Las redes estan protegidas y administradas,1,1.2
+8.25,8 - Controles Tecnologicos,Ciclo de vida de desarrollo seguro,La seguridad se integra al desarrollo de software,1,1.3
+8.28,8 - Controles Tecnologicos,Codificacion segura,Se aplican practicas de codificacion segura,1,1.1
+8.29,8 - Controles Tecnologicos,Pruebas de seguridad,Se realizan pruebas de seguridad antes de produccion,1,1.2
