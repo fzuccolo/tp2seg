@@ -12,6 +12,6 @@ test:
 	$(PYTHON) -m pytest
 
 app:
-	streamlit run tablero/app.py
+	streamlit run app/app.py
 
 ci: validate test build

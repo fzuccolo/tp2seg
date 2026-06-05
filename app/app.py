@@ -1,14 +1,18 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from motor.datos import list_companies, load_dataset, repo_root
-from motor.metricas import compute_metrics
+from app.datos import list_companies, load_dataset, repo_root
+from app.metricas import compute_metrics
 
 
 ROOT = repo_root()
@@ -54,7 +58,7 @@ with tab_global:
         range_x=[0, 100],
     )
     fig.update_layout(height=430, margin=dict(l=20, r=20, t=20, b=20))
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 with tab_controles:
     top = result.top_brechas.copy()
@@ -69,7 +73,7 @@ with tab_controles:
         labels={"brecha_pct": "Brecha %", "control_id": "Control"},
     )
     fig.update_layout(height=430, margin=dict(l=20, r=20, t=20, b=20))
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
     st.dataframe(
         result.controles[
             [
@@ -82,7 +86,7 @@ with tab_controles:
                 "observaciones",
             ]
         ],
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
 
@@ -100,7 +104,7 @@ with tab_proyectos:
         labels={"esfuerzo_jornadas": "Esfuerzo jornadas", "aporte_seguridad": "Aporte seguridad"},
     )
     fig.update_layout(height=430, margin=dict(l=20, r=20, t=20, b=20))
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
     st.dataframe(
         projects[
             [
@@ -113,7 +117,7 @@ with tab_proyectos:
                 "prioridad",
             ]
         ],
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
 

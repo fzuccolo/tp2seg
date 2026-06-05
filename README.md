@@ -15,8 +15,7 @@ El objetivo es mantener el trabajo como codigo: datos versionados, metricas calc
 
 ```text
 datos/      Datos del estandar y de cada empresa
-motor/      Logica reutilizable de carga y metricas
-tablero/    App Streamlit
+app/        App Streamlit y logica reutilizable de carga/metricas/render
 scripts/    Comandos de validacion y generacion
 informe/    Informe Quarto por empresa
 slides/     Presentacion Quarto por empresa
@@ -87,7 +86,7 @@ El workflow `.github/workflows/ci.yml` corre en cada push a `main`:
 El entrypoint para Streamlit Community Cloud es:
 
 ```text
-tablero/app.py
+app/app.py
 ```
 
 Cuando el repo privado este conectado a Streamlit, los pushes a `main` actualizan el tablero. La URL final se configura desde Streamlit Community Cloud.

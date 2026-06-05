@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from motor.metricas import MetricResult
+from app.metricas import MetricResult
 
 
 def _markdown_table(df: pd.DataFrame, columns: list[str], headers: list[str], rows: int | None = None) -> str:

@@ -9,9 +9,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from motor.datos import list_companies, load_dataset, repo_root
-from motor.metricas import compute_metrics
-from motor.render import write_outputs
+from app.datos import list_companies, load_dataset, repo_root
+from app.metricas import compute_metrics
+from app.render import write_outputs
 
 
 ROOT = repo_root()

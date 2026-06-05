@@ -1,5 +1,5 @@
-from motor.datos import load_dataset
-from motor.metricas import compute_metrics
+from app.datos import load_dataset
+from app.metricas import compute_metrics
 
 
 def test_madurez_global_esta_en_rango():
