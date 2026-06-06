@@ -1,7 +1,5 @@
 # TP2 - Tablero de Control de Seguridad
 
-Repositorio reproducible para el TP2 de Seguridad Informatica.
-
 El objetivo es mantener el trabajo como codigo: datos versionados, metricas calculadas, tablero interactivo, informe y slides generados por pipeline.
 
 ## Stack
@@ -111,7 +109,7 @@ El workflow `.github/workflows/ci.yml` corre en cada push a `main` y tambien se 
 
 Artifacts principales:
 
-- `tp2-tecnohogar-presentacion`: presentacion HTML lista para exponer.
+- `tp2-tecnohogar-presentacion`: presentacion HTML y `presentacion.pptx` editable en PowerPoint.
 - `tp2-tecnohogar-informe-ejecutivo`: informe ejecutivo HTML.
 - `tp2-build-completo`: metricas, CSV, informe, slides y salidas completas.
 
@@ -130,7 +128,7 @@ El entrypoint para Streamlit Community Cloud es:
 app/app.py
 ```
 
-Cuando el repo privado este conectado a Streamlit, los pushes a `main` actualizan el tablero. La URL final se configura desde Streamlit Community Cloud.
+Los pushes a `main` actualizan el tablero. La URL final se configura desde Streamlit Community Cloud.
 
 ## Base academica
 

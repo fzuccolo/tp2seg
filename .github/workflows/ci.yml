@@ -71,7 +71,7 @@ jobs:
             echo ""
             echo "Descargar desde la seccion **Artifacts** de esta corrida:"
             echo ""
-            echo "- **tp2-tecnohogar-presentacion**: presentacion HTML lista para exponer."
+            echo "- **tp2-tecnohogar-presentacion**: presentacion HTML y PPTX lista para exponer."
             echo "- **tp2-tecnohogar-informe-ejecutivo**: informe ejecutivo HTML."
             echo "- **tp2-build-completo**: metricas, CSV, informe, slides y salidas completas."
             echo ""

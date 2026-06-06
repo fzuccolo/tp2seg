@@ -11,6 +11,7 @@ sys.path.insert(0, str(ROOT))
 
 from app.datos import list_companies, load_dataset, repo_root
 from app.metricas import compute_metrics
+from app.pptx_export import write_pptx
 from app.render import write_outputs
 
 
@@ -62,6 +63,7 @@ def main() -> int:
 
         render_quarto(ROOT / "docs" / "informe" / empresa_id / "informe.qmd", company_output / "informe")
         render_quarto(ROOT / "docs" / "slides" / empresa_id / "presentacion.qmd", company_output / "slides")
+        write_pptx(result, company_output / "slides" / "presentacion.pptx")
 
         print(f"Generadas salidas para {empresa_id}: {company_output}")
     return 0
