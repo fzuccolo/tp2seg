@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -53,7 +54,7 @@ QUADRANT_COLORS = {
     "Mejora tactica": "#f59e0b",
     "Diferir": "#64748b",
 }
-DASHBOARD_CACHE_VERSION = "story-dashboard-v2"
+DASHBOARD_CACHE_VERSION = "story-dashboard-v3"
 
 
 @st.cache_data
@@ -103,12 +104,21 @@ def section_title(title: str, detail: str = "") -> None:
 
 
 def metric_card(label: str, value: str, detail: str, accent: str = "#2563eb") -> None:
+    label_text = escape(str(label))
+    value_text = str(value)
+    detail_text = escape(str(detail))
+    value_class = "metric-value"
+    if any(char.isalpha() for char in value_text) or len(value_text) > 14:
+        value_class += " metric-value-text"
+    if len(value_text) > 26:
+        value_class += " metric-value-long"
+    value_html = escape(value_text)
     st.markdown(
         f"""
         <div class="metric-card" style="border-left-color:{accent}">
-          <div class="metric-label">{label}</div>
-          <div class="metric-value">{value}</div>
-          <div class="metric-detail">{detail}</div>
+          <div class="metric-label">{label_text}</div>
+          <div class="{value_class}" title="{value_html}">{value_html}</div>
+          <div class="metric-detail">{detail_text}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -358,6 +368,16 @@ st.markdown(
         font-weight: 850;
         margin-top: 7px;
       }
+      .metric-value-text {
+        font-size: 1.38rem;
+        line-height: 1.15;
+        overflow-wrap: break-word;
+        word-break: normal;
+      }
+      .metric-value-long {
+        font-size: 1.18rem;
+        line-height: 1.14;
+      }
       .metric-detail {
         color: #64748b;
         font-size: 0.88rem;
@@ -417,7 +437,7 @@ with tab_resumen:
     with k3:
         metric_card("Control critico", resumen["control_mas_critico"], "Mayor brecha ponderada", "#f59e0b")
     with k4:
-        metric_card("Capacidad debil", short_text(resumen["capacidad_mas_debil"], 22), "Menor madurez", "#7c3aed")
+        metric_card("Capacidad debil", resumen["capacidad_mas_debil"], "Menor madurez", "#7c3aed")
     with k5:
         metric_card("Quick wins", str(resumen["quick_wins"]), "Impacto alto / esfuerzo bajo", "#16a34a")
 
