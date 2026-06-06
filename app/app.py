@@ -781,6 +781,6 @@ with tab_descargas:
         resumen_json = json.dumps(result.resumen, ensure_ascii=False, indent=2).encode("utf-8")
         st.download_button("resumen.json", resumen_json, file_name=f"{selected}_resumen.json", mime="application/json")
 
-    output_dir = Path("salidas") / selected
+    output_dir = Path(".build") / selected
     if output_dir.exists():
-        st.info(f"Salidas locales disponibles en {output_dir}")
+        st.info(f"Build local disponible en {output_dir}")

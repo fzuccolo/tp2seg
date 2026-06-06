@@ -23,7 +23,7 @@ def render_quarto(input_file: Path, output_dir: Path) -> None:
     if shutil.which("quarto") is None:
         raise RuntimeError("No se encontro quarto en PATH")
 
-    temp_root = input_file.parent / ".quarto_tmp"
+    temp_root = ROOT / ".build" / ".quarto_tmp" / input_file.parent.relative_to(ROOT)
     temp_dir = temp_root / output_dir.name
     if temp_dir.exists():
         shutil.rmtree(temp_dir)
@@ -37,9 +37,8 @@ def render_quarto(input_file: Path, output_dir: Path) -> None:
     env["XDG_CACHE_HOME"] = str(cache_dir)
     env["DENO_DIR"] = str(deno_dir)
     input_arg = input_file.relative_to(ROOT)
-    output_arg = temp_dir.relative_to(input_file.parent)
     subprocess.run(
-        ["quarto", "render", str(input_arg), "--output-dir", str(output_arg)],
+        ["quarto", "render", str(input_arg), "--output-dir", str(temp_dir)],
         cwd=ROOT,
         env=env,
         check=True,
@@ -56,13 +55,13 @@ def main() -> int:
     for empresa_id in list_companies(ROOT):
         dataset = load_dataset(empresa_id, ROOT)
         result = compute_metrics(dataset)
-        company_output = ROOT / "salidas" / empresa_id
+        company_output = ROOT / ".build" / empresa_id
         if company_output.exists():
             shutil.rmtree(company_output)
         write_outputs(result, company_output)
 
-        render_quarto(ROOT / "informe" / empresa_id / "informe.qmd", company_output / "informe")
-        render_quarto(ROOT / "slides" / empresa_id / "presentacion.qmd", company_output / "slides")
+        render_quarto(ROOT / "docs" / "informe" / empresa_id / "informe.qmd", company_output / "informe")
+        render_quarto(ROOT / "docs" / "slides" / empresa_id / "presentacion.qmd", company_output / "slides")
 
         print(f"Generadas salidas para {empresa_id}: {company_output}")
     return 0

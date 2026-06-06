@@ -20,7 +20,7 @@ El alcance inicial cubre controles organizativos, de personas, fisicos y tecnolo
 
 # Resultados
 
-{{< include ../../salidas/tecnohogar/resumen_informe.md >}}
+{{< include ../../../.build/tecnohogar/resumen_informe.md >}}
 
 # Criterio de madurez
 

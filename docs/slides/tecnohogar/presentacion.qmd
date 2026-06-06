@@ -19,7 +19,7 @@ execute:
 
 ## Diagnostico
 
-{{< include ../../salidas/tecnohogar/resumen_slides.md >}}
+{{< include ../../../.build/tecnohogar/resumen_slides.md >}}
 
 ## Tablero
 

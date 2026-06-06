@@ -17,9 +17,8 @@ El objetivo es mantener el trabajo como codigo: datos versionados, metricas calc
 datos/      Datos del estandar y de cada empresa
 app/        App Streamlit y logica reutilizable de carga/metricas/render
 scripts/    Comandos de validacion y generacion
-informe/    Informe Quarto por empresa
-slides/     Presentacion Quarto por empresa
-salidas/    Archivos generados
+docs/       Fuentes Quarto de informes y presentaciones
+.build/     Archivos generados localmente, ignorados por git
 ```
 
 ## Empresas
@@ -72,7 +71,7 @@ make app
 Luego de `make build`, las salidas quedan en:
 
 ```text
-salidas/<empresa>/
+.build/<empresa>/
   metricas.csv
   capitulos.csv
   madurez_distribucion.csv
@@ -96,7 +95,7 @@ El workflow `.github/workflows/ci.yml` corre en cada push a `main`:
 3. Valida los datos.
 4. Ejecuta tests.
 5. Genera informe, slides y metricas.
-6. Publica `salidas/` como artifact descargable.
+6. Publica `.build/` como artifact descargable.
 
 ## Deploy del tablero
 

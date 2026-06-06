@@ -42,8 +42,8 @@ jobs:
       - name: Upload generated deliverables
         uses: actions/upload-artifact@v4
         with:
-          name: salidas-tp2
-          path: salidas/
+          name: build-tp2
+          path: .build/
           retention-days: 30
 
       - name: Update deploy branch

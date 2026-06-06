@@ -5,8 +5,7 @@ __pycache__/
 .cache/
 .quarto_tmp/
 **/.quarto_tmp/
-informe/*/.gitignore
-slides/*/.gitignore
+docs/*/*/.gitignore
 **/*_files/
 .ruff_cache/
 .mypy_cache/
@@ -14,8 +13,8 @@ slides/*/.gitignore
 *_files/
 .DS_Store
 
-salidas/*
-!salidas/.gitkeep
+.build/
+salidas/
 
 /.quarto/
 **/*.quarto_ipynb
