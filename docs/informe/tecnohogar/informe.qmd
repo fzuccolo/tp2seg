@@ -1,40 +1,93 @@
 ---
-title: "Informe Ejecutivo - Tablero de Control de Seguridad"
-subtitle: "TecnoHogar S.A."
 format:
   html:
     toc: true
     toc-depth: 2
     theme: cosmo
+  typst:
+    toc: false
+    mainfont: "DejaVu Sans"
+    fontsize: 11pt
+    margin:
+      x: 1.65cm
+      y: 1.55cm
 execute:
   echo: false
 ---
 
+```{=typst}
+#set page(margin: (x: 1.65cm, y: 1.55cm))
+#set text(font: "DejaVu Sans", size: 11pt)
+#set par(leading: 0.95em, spacing: 1.55em)
+#show heading.where(level: 1): it => block(above: 1.75em, below: 1.1em)[#it]
+#show heading.where(level: 2): it => block(above: 1.45em, below: 0.95em)[#it]
+#show list: it => block(above: 0.35em, below: 0.9em)[#it]
+#align(center)[#text(size: 17pt, weight: "bold")[Informe Ejecutivo de Seguridad de la Información]]
+#v(0.35em)
+#align(center)[#text(size: 12pt, weight: "bold")[TecnoHogar S.A. | Evaluación ISO/IEC 27002:2022]]
+#v(0.9em)
+#align(center)[#text(size: 10.5pt)[Grupo 1 | Seguridad de la Información]]
+#v(1.55em)
+```
+
+```{=html}
+<style>
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+.main-container {
+  max-width: 1080px;
+}
+p {
+  margin: 0 0 1.35rem;
+}
+h1,
+h2,
+h3 {
+  margin-top: 2.25rem;
+  margin-bottom: 1rem;
+}
+img {
+  width: 100%;
+}
+.report-heading {
+  margin: 0 auto 2rem;
+  text-align: center;
+}
+.report-heading h1 {
+  font-size: 1.9rem;
+  margin-bottom: 0.5rem;
+}
+.report-heading h2 {
+  font-size: 1.25rem;
+  margin: 0 0 1.4rem;
+}
+.report-heading p {
+  margin: 0;
+}
+</style>
+
+<div class="report-heading">
+  <h1>Informe Ejecutivo de Seguridad de la Información</h1>
+  <h2>TecnoHogar S.A. | Evaluación ISO/IEC 27002:2022</h2>
+  <p>Grupo 1 | Seguridad de la Información</p>
+</div>
+```
+
 # Objetivo
 
-Este informe presenta el diagnostico reproducible de seguridad de TecnoHogar S.A. La evaluacion usa los 93 controles ISO/IEC 27002:2022 incluidos en el repositorio y una escala de madurez CMMI.
+Este informe presenta una evaluación ejecutiva de seguridad de la información de TecnoHogar S.A. con referencia en ISO/IEC 27002:2022. El objetivo es convertir la información operativa y de activos en una lectura accionable: madurez actual, brechas prioritarias y plan de mejora.
 
-# Alcance
+El documento no busca agotar el detalle de cada control. Resume los hallazgos necesarios para la toma de decisión: **dónde está más expuesta la organización**, **qué capacidades requieren atención prioritaria** y **qué acciones conviene ejecutar primero**.
 
-El alcance cubre controles organizativos, de personas, fisicos y tecnologicos. El caso evaluado es ficticio y deriva del inventario, dependencias, roles y clasificacion CID realizados en el TP1.
+# Alcance y metodología
+
+La evaluación cubre los cuatro capítulos de controles de ISO/IEC 27002:2022: organizativos, de personas, físicos y tecnológicos. Cada control se calificó con una escala de madurez CMMI de 0 a 5 y se normalizó para calcular madurez, brecha y brecha ponderada.
+
+La cadena de trazabilidad utilizada es: **control ISO -> evidencia -> nivel de madurez -> brecha ponderada -> iniciativa del plan**. Esto permite vincular cada recomendación con una necesidad concreta de mejora.
 
 # Resultados
 
 {{< include ../../../.build/tecnohogar/resumen_informe.md >}}
-
-# Criterio de madurez
-
-La madurez se calcula con una escala de 0 a 5:
-
-- 0 Inexistente
-- 1 Inicial
-- 2 Gestionado
-- 3 Definido
-- 4 Cuantitativo
-- 5 Optimizado
-
-El porcentaje global pondera cada control por su peso relativo y calcula la brecha restante respecto del valor maximo.
-
-# Proximos pasos
-
-El plan de trabajo prioriza formalizar gobierno SGSI, accesos, proveedores, incidentes, continuidad, seguridad fisica, hardening y SDLC seguro. Cada iniciativa se vincula con controles ISO concretos para sostener la defensa del tablero.

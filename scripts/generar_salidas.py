@@ -22,7 +22,7 @@ ROOT = repo_root()
 DELIVERABLE_CASE = "tecnohogar"
 
 
-def render_quarto(input_file: Path, output_dir: Path) -> None:
+def render_quarto(input_file: Path, output_dir: Path, to_format: str | None = None) -> None:
     if not input_file.exists():
         return
     if shutil.which("quarto") is None:
@@ -42,12 +42,11 @@ def render_quarto(input_file: Path, output_dir: Path) -> None:
     env["XDG_CACHE_HOME"] = str(cache_dir)
     env["DENO_DIR"] = str(deno_dir)
     input_arg = input_file.relative_to(ROOT)
-    subprocess.run(
-        ["quarto", "render", str(input_arg), "--output-dir", str(temp_dir)],
-        cwd=ROOT,
-        env=env,
-        check=True,
-    )
+    command = ["quarto", "render", str(input_arg)]
+    if to_format:
+        command.extend(["--to", to_format])
+    command.extend(["--output-dir", str(temp_dir)])
+    subprocess.run(command, cwd=ROOT, env=env, check=True)
 
     if output_dir.exists():
         shutil.rmtree(output_dir)
@@ -91,6 +90,31 @@ def render_quarto_pdf(input_file: Path, output_file: Path) -> None:
     shutil.move(str(generated), output_file)
 
 
+def render_report(input_file: Path, case_output: Path) -> None:
+    if not input_file.exists():
+        return
+
+    source_dir = ROOT / ".build" / ".quarto_tmp" / "report_source" / case_output.name
+    if source_dir.exists():
+        shutil.rmtree(source_dir)
+    source_dir.mkdir(parents=True, exist_ok=True)
+
+    assets_src = case_output / "report_assets"
+    assets_dst = source_dir / "report_assets"
+    if assets_src.exists():
+        shutil.copytree(assets_src, assets_dst)
+
+    summary = (case_output / "resumen_informe.md").read_text(encoding="utf-8")
+    source = input_file.read_text(encoding="utf-8")
+    source = source.replace("{{< include ../../../.build/tecnohogar/resumen_informe.md >}}", summary)
+    temp_input = source_dir / "informe.qmd"
+    temp_input.write_text(source, encoding="utf-8")
+
+    output_dir = case_output / "informe"
+    render_quarto(temp_input, output_dir, "html")
+    render_quarto_pdf(temp_input, output_dir / "informe.pdf")
+
+
 def package_deliverables(caso_id: str) -> None:
     build_dir = ROOT / ".build" / caso_id
     pptx = build_dir / "slides" / "presentacion.pptx"
@@ -105,9 +129,9 @@ def package_deliverables(caso_id: str) -> None:
         shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    stable_pptx = output_dir / "tp2-tecnohogar-presentacion.pptx"
-    stable_pdf = output_dir / "tp2-tecnohogar-informe.pdf"
-    stable_zip = output_dir / "tp2-tecnohogar-entregables.zip"
+    stable_pptx = output_dir / "tp2-grupo1-tecnohogar-presentacion.pptx"
+    stable_pdf = output_dir / "tp2-grupo1-tecnohogar-informe.pdf"
+    stable_zip = output_dir / "tp2-grupo1-tecnohogar-entregables.zip"
     manifest = output_dir / "manifest.json"
 
     shutil.copy2(pptx, stable_pptx)
@@ -144,9 +168,8 @@ def main() -> int:
             shutil.rmtree(company_output)
         write_outputs(result, company_output)
 
-        render_quarto(ROOT / "docs" / "informe" / caso_id / "informe.qmd", company_output / "informe")
-        render_quarto_pdf(ROOT / "docs" / "informe" / caso_id / "informe.qmd", company_output / "informe" / "informe.pdf")
-        render_quarto(ROOT / "docs" / "slides" / caso_id / "presentacion.qmd", company_output / "slides")
+        render_report(ROOT / "docs" / "informe" / caso_id / "informe.qmd", company_output)
+        render_quarto(ROOT / "docs" / "slides" / caso_id / "presentacion.qmd", company_output / "slides", "revealjs")
         write_pptx(result, company_output / "slides" / "presentacion.pptx")
 
         print(f"Generadas salidas para {caso_id}: {company_output}")

@@ -4,6 +4,7 @@ subtitle: "TecnoHogar S.A. | ISO/IEC 27002:2022"
 format:
   revealjs:
     theme: simple
+    title-slide: false
     slide-number: true
     chalkboard: false
     transition: fade
@@ -14,16 +15,36 @@ execute:
 ---
 
 <style>
-.reveal h2 {
-  color: #0f172a;
+.reveal h1, .reveal h2 { color: #0f172a; }
+.reveal strong { color: #1d4ed8; }
+.cover {
+  background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 58%, #0891b2 100%);
+  color: #ffffff;
+  height: 100%;
+  padding: 4.4rem 4rem 2.2rem 4rem;
 }
-.reveal strong {
-  color: #1d4ed8;
+.cover h1 {
+  color: #ffffff;
+  font-size: 3.6rem;
+  line-height: 1.02;
+  margin-bottom: 1.2rem;
+}
+.cover .subtitle {
+  color: #dbeafe;
+  font-size: 1.35rem;
+  font-weight: 650;
+}
+.cover .group {
+  bottom: 2rem;
+  color: #e0f2fe;
+  font-size: 0.86rem;
+  position: absolute;
+  right: 3rem;
 }
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
   gap: 0.75rem;
+  grid-template-columns: repeat(3, 1fr);
   margin-top: 1rem;
 }
 .metric-card {
@@ -46,8 +67,8 @@ execute:
 }
 .flow {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
   gap: 0.55rem;
+  grid-template-columns: repeat(5, 1fr);
   margin-top: 1.1rem;
 }
 .flow div {
@@ -60,11 +81,26 @@ execute:
   padding: 0.85rem 0.45rem;
   text-align: center;
 }
-.small {
-  color: #475569;
-  font-size: 0.74rem;
-}
+.small { color: #475569; font-size: 0.74rem; }
 </style>
+
+## {.cover}
+
+# Tablero de Control de Seguridad
+
+<div class="subtitle">TecnoHogar S.A. | ISO/IEC 27002:2022</div>
+
+<br>
+
+**Diagnostico, brechas y plan de mejora priorizado**
+
+<div class="group">Grupo 1 | Seguridad Informatica | TP2</div>
+
+::: {.notes}
+**Narrativa:** Abrir con una idea simple: no venimos a mostrar una planilla, venimos a mostrar como el relevamiento del TP1 se convierte en decisiones de seguridad. La historia es **inventario -> diagnostico -> brechas -> plan**.
+
+**Referencias:** **ISO/IEC 27002:2022** es el catalogo de controles. **Grupo 1** es la identificacion formal de la entrega.
+:::
 
 ## Punto de partida
 
@@ -73,8 +109,9 @@ execute:
 - La pregunta central es: **donde esta expuesta TecnoHogar y que conviene hacer primero**.
 
 ::: {.notes}
-Abrir con la continuidad TP1 -> TP2. No presentar esto como un ejercicio aislado:
-el tablero nace del inventario y de la criticidad relevada antes.
+**Narrativa:** Presentar continuidad. El TP2 no arranca desde cero: toma activos, procesos y criticidad para evaluar controles. Esto permite que el tablero tenga contexto de negocio.
+
+**Referencias:** **CID** significa confidencialidad, integridad y disponibilidad. Es la base para entender criticidad de activos.
 :::
 
 ## Alcance
@@ -101,8 +138,9 @@ el tablero nace del inventario y de la criticidad relevada antes.
 ::::
 
 ::: {.notes}
-Remarcar que no elegimos solo 4 metricas: tomamos los cuatro capitulos
-evaluables y los 93 controles trabajados en la materia.
+**Narrativa:** Remarcar cobertura. No elegimos algunos indicadores aislados: cubrimos los cuatro capitulos evaluables y los **93 controles** trabajados para el tablero.
+
+**Referencias:** Los capitulos 5, 6, 7 y 8 son organizativos, personas, fisicos y tecnologicos.
 :::
 
 ## Metodo de medicion
@@ -121,11 +159,12 @@ evaluables y los 93 controles trabajados en la materia.
 - **Prioridad**: brecha asociada + aporte esperado del proyecto.
 
 ::: {.notes}
-Esta es la defensa metodologica. Si preguntan "de donde sale el numero", la
-respuesta es: control ISO, evidencia, nivel CMMI y peso.
+**Narrativa:** Esta slide defiende el numero. Si preguntan de donde sale un valor, la respuesta es siempre la misma: control ISO, evidencia, nivel CMMI y peso.
+
+**Referencias:** **CMMI 0..5**: 0 inexistente, 1 inicial, 2 gestionado, 3 definido, 4 cuantitativo, 5 optimizado.
 :::
 
-## Fuentes de datos
+## Datos
 
 :::: {.columns}
 ::: {.column width="33%"}
@@ -157,8 +196,9 @@ respuesta es: control ISO, evidencia, nivel CMMI y peso.
 ::::
 
 ::: {.notes}
-Importante: separar lo que sale del TP1 de lo que definimos como grupo. Eso hace
-defendible el tablero y evita que parezca una planilla con numeros arbitrarios.
+**Narrativa:** Separar lo observado, lo definido y lo derivado. Eso evita que parezca una coleccion arbitraria de numeros y hace defendible cada grafico.
+
+**Referencias:** **Trazabilidad** significa poder ir desde una decision del plan hasta el control y la evidencia que la justifican.
 :::
 
 ## Resultado ejecutivo
@@ -172,12 +212,13 @@ defendible el tablero y evita que parezca una planilla con numeros arbitrarios.
   <div class="metric-card"><div class="value">604</div><div class="label">Jornadas estimadas</div></div>
 </div>
 
-- El diagnostico muestra una organizacion con practicas existentes, pero sin SGSI medido.
-- La brecha no se concentra en un unico tema: combina personas, fisico, eventos y tecnologia.
+- Hay base operativa, pero todavia no hay un SGSI medido y optimizado.
+- La brecha combina gobierno, personas, seguridad fisica, eventos y tecnologia.
 
 ::: {.notes}
-No leer todos los numeros. Usar 38.4/61.6 como mensaje principal: hay base
-operativa, pero falta formalizacion, medicion y continuidad.
+**Narrativa:** No leer todos los numeros. Mensaje central: **38.4% de madurez** y **61.6% de brecha**. Hay trabajo hecho, pero falta formalizar, medir y sostener.
+
+**Referencias:** **SGSI**: sistema de gestion de seguridad de la informacion.
 :::
 
 ## Lectura por capitulos
@@ -193,8 +234,9 @@ operativa, pero falta formalizacion, medicion y continuidad.
 - Personas y seguridad fisica quedan muy cerca: el riesgo es transversal.
 
 ::: {.notes}
-Evitar decir "todo esta mal". La lectura correcta es que hay madurez media-baja y
-una brecha distribuida. Eso justifica un plan por etapas.
+**Narrativa:** Evitar decir "todo esta mal". La lectura correcta es madurez media-baja y brecha distribuida. Eso justifica un plan por etapas.
+
+**Referencias:** **Capitulo mas debil** no significa unico problema; indica por donde empezar a mirar.
 :::
 
 ## Mapa ISO
@@ -207,25 +249,28 @@ una brecha distribuida. Eso justifica un plan por etapas.
 **Demo:** abrir `Mapa ISO` y mostrar la superficie de controles.
 
 ::: {.notes}
-Mostrar el treemap. Frase clave: "no es un grafico decorativo; es el universo
-completo de controles evaluados".
+**Narrativa:** Esta es la demostracion visual mas fuerte. Frase clave: el mapa no es decorativo, es el universo completo de controles evaluados.
+
+**Referencias:** El mapa permite navegar de resumen ejecutivo a detalle por control.
 :::
 
 ## Brechas principales
 
-| Control | Brecha | Lectura |
+| Control | Brecha ponderada | Lectura |
 | --- | ---: | --- |
-| 6.1 Screening | 85.0% | Falta formalizar verificaciones de ingreso |
-| 6.3 Concientizacion | 85.0% | No hay programa anual medido |
-| 6.5 Desvinculacion | 85.0% | Riesgo en bajas y cambios de rol |
-| 6.7 Trabajo remoto | 85.0% | Politicas y controles incompletos |
-| 7.4 Monitoreo fisico | 85.0% | Cobertura desigual entre sedes |
+| 6.1 Screening | 2.66 | Falta formalizar verificaciones de ingreso |
+| 6.3 Concientizacion | 2.66 | No hay programa anual medido |
+| 6.5 Desvinculacion | 2.66 | Riesgo en bajas y cambios de rol |
+| 6.7 Trabajo remoto | 2.66 | Politicas y controles incompletos |
+| 7.4 Monitoreo fisico | 1.52 | Cobertura desigual entre sedes |
 
 - El Pareto permite explicar por que el plan no intenta resolver todo al mismo tiempo.
+- La brecha cruda puede repetirse si varios controles tienen el mismo nivel CMMI; el ranking se ordena por brecha ponderada.
 
 ::: {.notes}
-Conectar brechas de personas y fisico con riesgo real: accesos indebidos,
-continuidad operativa, evidencia insuficiente y exposicion del e-commerce.
+**Narrativa:** Conectar brechas con riesgo real: accesos indebidos, continuidad operativa, evidencia insuficiente y exposicion del e-commerce.
+
+**Referencias:** **Pareto de brechas** ordena controles por impacto de mejora, no por orden numerico del estandar. Si aparece 85% repetido, es la brecha cruda de controles en CMMI 2; para priorizar se usa **brecha ponderada**.
 :::
 
 ## Perfil de seguridad
@@ -242,8 +287,9 @@ continuidad operativa, evidencia insuficiente y exposicion del e-commerce.
 - Para un e-commerce, esto impacta directamente en aplicaciones, redes, APIs y continuidad.
 
 ::: {.notes}
-Esta slide sirve para mostrar que usamos mas de una vista. No solo capitulos ISO:
-tambien capacidades operacionales para tomar decisiones.
+**Narrativa:** Esta slide muestra que no usamos una sola vista. Los capitulos ISO explican cobertura; las capacidades explican decisiones operativas.
+
+**Referencias:** **Capacidad operacional** agrupa controles por funcion de seguridad para facilitar gestion.
 :::
 
 ## Plan de mejora
@@ -260,13 +306,14 @@ tambien capacidades operacionales para tomar decisiones.
 - Se prioriza por brecha asociada, esfuerzo y aporte a seguridad.
 
 ::: {.notes}
-Marcar que "quick win" no significa menor importancia: significa impacto alto con
-esfuerzo relativo bajo frente al resto de la cartera.
+**Narrativa:** Quick win no significa poco importante. Significa alto impacto con esfuerzo razonable frente al resto de la cartera. El plan prioriza sin ocultar que hay trabajo estructural.
+
+**Referencias:** **Prioridad** combina brecha asociada, esfuerzo y aporte esperado de seguridad.
 :::
 
-## Demo del tablero
+## Tablero publicado
 
-Ruta recomendada para la defensa:
+Vistas principales:
 
 1. **Ejecutivo**: madurez, brecha y quick wins.
 2. **Mapa ISO**: 93 controles y distribucion CMMI.
@@ -274,27 +321,17 @@ Ruta recomendada para la defensa:
 4. **Plan**: proyectos, esfuerzo y roadmap.
 5. **Trazabilidad**: control -> proyecto -> evidencia.
 
-::: {.notes}
-La demo debe durar 3 a 4 minutos. No navegar libremente. Si hay poco tiempo,
-mostrar Ejecutivo, Mapa ISO, Plan y Trazabilidad.
-:::
+**URL:** <https://tp2seg.streamlit.app/>
 
-## Diferenciales frente al ejemplo
-
-- No depende de completar planillas manualmente.
-- Evalua los **93 controles** de ISO/IEC 27002:2022.
-- Datos versionados y documentados.
-- Validacion automatica en CI.
-- Tablero interactivo desplegable.
-- Informe y presentacion generables desde el repo.
-- Trazabilidad entre evidencia, brecha y proyecto.
+**Valor para gestion:** consulta ejecutiva, navegacion a detalle y seguimiento periodico del plan de mejora.
 
 ::: {.notes}
-No criticar el ejemplo. Presentarlo como referencia y explicar que nuestro
-diferencial es la reproducibilidad y la trazabilidad.
+**Narrativa:** La demo debe durar 3 a 4 minutos. No navegar libremente. Mostrar que el tablero permite pasar de direccion a detalle sin perder trazabilidad.
+
+**Referencias:** Si hay poco tiempo, priorizar Ejecutivo, Mapa ISO, Plan y Trazabilidad.
 :::
 
-## Cierre
+## Conclusiones y proximos pasos
 
 **Decision recomendada:** usar el tablero como instrumento de gobierno, no solo como entrega academica.
 
@@ -304,6 +341,7 @@ diferencial es la reproducibilidad y la trazabilidad.
 - Usar trazabilidad para justificar presupuesto y seguimiento.
 
 ::: {.notes}
-Cerrar con una frase de gestion: el tablero resume 93 metricas en decisiones
-concretas. Ese es el punto central de la materia.
+**Narrativa:** Cerrar con gestion. El tablero resume 93 controles en decisiones concretas: que mirar, que priorizar y como justificar el plan.
+
+**Referencias:** **Gobierno de seguridad** implica responsables, medicion, seguimiento y mejora continua.
 :::

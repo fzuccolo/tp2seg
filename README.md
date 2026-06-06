@@ -6,9 +6,9 @@ Generación del tablero de seguridad para TecnoHogar basado en ISO/IEC 27002:202
 
 * Tablero: https://tp2seg.streamlit.app/
 * Datos fuente: [datos](./datos)
-* Presentacion PPTX: https://github.com/fzuccolo/tp2seg/releases/latest/download/tp2-tecnohogar-presentacion.pptx
-* Informe PDF: https://github.com/fzuccolo/tp2seg/releases/latest/download/tp2-tecnohogar-informe.pdf
-* ZIP PPTX + PDF: https://github.com/fzuccolo/tp2seg/releases/latest/download/tp2-tecnohogar-entregables.zip
+* Informe ejecutivo: [tp2-grupo1-tecnohogar-informe.pdf](https://github.com/fzuccolo/tp2seg/releases/latest/download/tp2-grupo1-tecnohogar-informe.pdf)
+* Presentacion: [tp2-grupo1-tecnohogar-presentacion.pptx](https://github.com/fzuccolo/tp2seg/releases/latest/download/tp2-grupo1-tecnohogar-presentacion.pptx)
+
 
 ## Estructura
 

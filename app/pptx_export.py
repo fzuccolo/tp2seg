@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+import zipfile
 from pathlib import Path
 from typing import Any
 
@@ -9,7 +11,7 @@ from pptx.chart.data import CategoryChartData
 from pptx.dml.color import RGBColor
 from pptx.enum.chart import XL_CHART_TYPE, XL_LABEL_POSITION, XL_LEGEND_POSITION, XL_TICK_MARK
 from pptx.enum.shapes import MSO_SHAPE
-from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
+from pptx.enum.text import MSO_ANCHOR, MSO_AUTO_SIZE, PP_ALIGN
 from pptx.util import Inches, Pt
 
 from app.metricas import MetricResult
@@ -37,16 +39,21 @@ def write_pptx(result: MetricResult, output_path: Path) -> None:
     prs.slide_width = SLIDE_W
     prs.slide_height = SLIDE_H
 
+    _slide_cover(prs, result)
     _slide_executive(prs, result)
     _slide_scope(prs, result)
+    _slide_method(prs, result)
     _slide_chapters(prs, result)
     _slide_maturity_distribution(prs, result)
     _slide_top_gaps(prs, result)
+    _slide_profile(prs, result)
     _slide_plan(prs, result)
+    _slide_demo(prs, result)
     _slide_traceability(prs, result)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     prs.save(output_path)
+    _add_speaker_notes(output_path, _speaker_notes())
 
 
 def _blank_slide(prs: Presentation, title: str, kicker: str = ""):
@@ -61,7 +68,7 @@ def _blank_slide(prs: Presentation, title: str, kicker: str = ""):
     _textbox(slide, title, Inches(0.6), Inches(0.58), Inches(8.4), Inches(0.55), Pt(24), NAVY, bold=True)
     _textbox(
         slide,
-        "TP2 Seguridad Informatica | TecnoHogar S.A. | ISO/IEC 27002:2022",
+        "TP2 Seguridad Informatica | Grupo 1 | TecnoHogar S.A. | ISO/IEC 27002:2022",
         Inches(0.6),
         Inches(7.05),
         Inches(8.5),
@@ -72,11 +79,54 @@ def _blank_slide(prs: Presentation, title: str, kicker: str = ""):
     return slide
 
 
-def _textbox(slide, text: str, x, y, w, h, size: Pt, color: RGBColor = NAVY, bold: bool = False, align=PP_ALIGN.LEFT):
+def _slide_cover(prs: Presentation, result: MetricResult) -> None:
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    bg = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, SLIDE_W, SLIDE_H)
+    bg.fill.solid()
+    bg.fill.fore_color.rgb = NAVY
+    bg.line.fill.background()
+
+    panel = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(8.45), 0, Inches(4.9), SLIDE_H)
+    panel.fill.solid()
+    panel.fill.fore_color.rgb = BLUE
+    panel.line.fill.background()
+
+    accent = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(8.1), 0, Inches(0.18), SLIDE_H)
+    accent.fill.solid()
+    accent.fill.fore_color.rgb = CYAN
+    accent.line.fill.background()
+
+    _textbox(slide, "Tablero de Control\nde Seguridad", Inches(0.75), Inches(1.25), Inches(7.4), Inches(1.75), Pt(40), WHITE, bold=True)
+    _textbox(slide, "TecnoHogar S.A. | ISO/IEC 27002:2022", Inches(0.8), Inches(3.2), Inches(6.6), Inches(0.36), Pt(17), RGBColor(219, 234, 254), bold=True)
+    _textbox(slide, "Diagnostico, brechas y plan de mejora priorizado", Inches(0.8), Inches(3.85), Inches(6.4), Inches(0.34), Pt(15), RGBColor(226, 232, 240))
+    _textbox(slide, "TP2 Seguridad Informatica", Inches(0.8), Inches(6.58), Inches(3.6), Inches(0.24), Pt(10), RGBColor(226, 232, 240))
+    _textbox(slide, "Grupo 1", Inches(10.95), Inches(6.58), Inches(1.4), Inches(0.24), Pt(9), RGBColor(224, 242, 254), bold=True, align=PP_ALIGN.RIGHT)
+
+    _metric_card(slide, "Controles", str(result.resumen["controles_evaluados"]), "universo evaluado", Inches(9.05), Inches(1.38), Inches(3.15), Inches(1.0), WHITE)
+    _metric_card(slide, "Madurez", f"{result.resumen['madurez_global_pct']}%", "postura actual", Inches(9.05), Inches(2.72), Inches(3.15), Inches(1.0), WHITE)
+    _metric_card(slide, "Plan", f"{result.resumen['proyectos']} proyectos", "acciones trazables", Inches(9.05), Inches(4.06), Inches(3.15), Inches(1.0), WHITE)
+
+
+def _textbox(
+    slide,
+    text: str,
+    x,
+    y,
+    w,
+    h,
+    size: Pt,
+    color: RGBColor = NAVY,
+    bold: bool = False,
+    align=PP_ALIGN.LEFT,
+    hyperlink: str | None = None,
+    fit: bool = False,
+):
     shape = slide.shapes.add_textbox(x, y, w, h)
     tf = shape.text_frame
     tf.clear()
     tf.word_wrap = True
+    if fit:
+        tf.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
     tf.margin_left = 0
     tf.margin_right = 0
     tf.margin_top = 0
@@ -89,6 +139,9 @@ def _textbox(slide, text: str, x, y, w, h, size: Pt, color: RGBColor = NAVY, bol
     run.font.size = size
     run.font.bold = bold
     run.font.color.rgb = color
+    if hyperlink:
+        run.hyperlink.address = hyperlink
+        run.font.underline = True
     return shape
 
 
@@ -127,16 +180,32 @@ def _card(slide, x, y, w, h, fill: RGBColor = WHITE, line: RGBColor = BORDER, ra
     return shape
 
 
-def _metric_card(slide, label: str, value: str, detail: str, x, y, w, h, color: RGBColor):
+def _metric_card(slide, label: str, value: str, detail: str, x, y, w, h, color: RGBColor, value_link: str | None = None):
     card = _card(slide, x, y, w, h)
     stripe = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, x, y, Inches(0.08), h)
     stripe.fill.solid()
     stripe.fill.fore_color.rgb = color
     stripe.line.fill.background()
 
-    _textbox(slide, value, x + Inches(0.18), y + Inches(0.22), w - Inches(0.32), Inches(0.36), Pt(18), NAVY, bold=True)
-    _textbox(slide, label.upper(), x + Inches(0.18), y + Inches(0.72), w - Inches(0.32), Inches(0.2), Pt(7), SLATE, bold=True)
-    _textbox(slide, detail, x + Inches(0.18), y + Inches(0.98), w - Inches(0.32), Inches(0.24), Pt(8), MUTED)
+    compact = h < Inches(0.95)
+    long_value = len(value) > 16
+    value_size = Pt(18 if not compact else 14)
+    if long_value:
+        value_size = Pt(14 if not compact else 11)
+
+    if compact:
+        value_y, value_h = Inches(0.12), Inches(0.26)
+        label_y, label_h = Inches(0.42), Inches(0.15)
+        detail_y, detail_h = Inches(0.58), Inches(0.16)
+    else:
+        value_y, value_h = Inches(0.18), Inches(0.32)
+        label_y, label_h = Inches(0.58), Inches(0.18)
+        detail_y, detail_h = Inches(0.80), Inches(0.18)
+
+    value_color = BLUE if value_link else NAVY
+    _textbox(slide, value, x + Inches(0.18), y + value_y, w - Inches(0.32), value_h, value_size, value_color, bold=True, hyperlink=value_link, fit=True)
+    _textbox(slide, label.upper(), x + Inches(0.18), y + label_y, w - Inches(0.32), label_h, Pt(7), SLATE, bold=True, fit=True)
+    _textbox(slide, detail, x + Inches(0.18), y + detail_y, w - Inches(0.32), detail_h, Pt(7), MUTED, fit=True)
     return card
 
 
@@ -190,13 +259,26 @@ def _series_color(chart, color: RGBColor, point_colors: list[RGBColor] | None = 
             point.format.fill.fore_color.rgb = point_colors[idx]
 
 
-def _bar_chart(slide, categories: list[str], values: list[float], x, y, w, h, title: str, color: RGBColor = BLUE):
+def _bar_chart(
+    slide,
+    categories: list[str],
+    values: list[float],
+    x,
+    y,
+    w,
+    h,
+    title: str,
+    color: RGBColor = BLUE,
+    max_scale_floor: float | None = 100.0,
+):
     _add_chart_title(slide, title, x, y - Inches(0.28), w)
     data = CategoryChartData()
     data.categories = categories
     data.add_series("Valor", values)
     chart = slide.shapes.add_chart(XL_CHART_TYPE.BAR_CLUSTERED, x, y, w, h, data).chart
-    _style_chart(chart, max_scale=max(100, max(values) * 1.12 if values else 100))
+    natural_max = max(values) * 1.12 if values else 1.0
+    max_scale = max(max_scale_floor, natural_max) if max_scale_floor is not None else natural_max
+    _style_chart(chart, max_scale=max_scale)
     _series_color(chart, color)
     plot = chart.plots[0]
     plot.has_data_labels = True
@@ -332,7 +414,7 @@ def _slide_scope(prs: Presentation, result: MetricResult) -> None:
 
     _textbox(
         slide,
-        "Los cuatro capitulos evaluables de ISO/IEC 27002:2022 quedan cubiertos. La defensa puede ir desde un indicador ejecutivo hasta cada control individual.",
+        "Los cuatro capitulos evaluables de ISO/IEC 27002:2022 quedan cubiertos. La lectura puede ir desde un indicador ejecutivo hasta cada control individual.",
         Inches(5.55),
         Inches(4.9),
         Inches(6.3),
@@ -368,6 +450,56 @@ def _slide_chapters(prs: Presentation, result: MetricResult) -> None:
     )
 
 
+def _slide_method(prs: Presentation, result: MetricResult) -> None:
+    slide = _blank_slide(prs, "Metodo de medicion", "Metodo")
+    steps = [
+        ("Control ISO", "catalogo comun"),
+        ("Evidencia", "fuente del caso"),
+        ("Nivel CMMI", "0 a 5"),
+        ("Brecha", "1 - madurez"),
+        ("Proyecto", "accion trazable"),
+    ]
+    x0, y = Inches(0.75), Inches(1.45)
+    for idx, (title, subtitle) in enumerate(steps):
+        x = x0 + Inches(2.45) * idx
+        _card(slide, x, y, Inches(1.85), Inches(1.05), fill=WHITE, line=RGBColor(191, 219, 254))
+        _textbox(slide, title, x + Inches(0.12), y + Inches(0.22), Inches(1.6), Inches(0.2), Pt(10), NAVY, bold=True, align=PP_ALIGN.CENTER)
+        _textbox(slide, subtitle, x + Inches(0.12), y + Inches(0.55), Inches(1.6), Inches(0.18), Pt(8), MUTED, align=PP_ALIGN.CENTER)
+        if idx < len(steps) - 1:
+            arrow = slide.shapes.add_shape(MSO_SHAPE.RIGHT_ARROW, x + Inches(1.83), y + Inches(0.38), Inches(0.52), Inches(0.28))
+            arrow.fill.solid()
+            arrow.fill.fore_color.rgb = BLUE
+            arrow.line.fill.background()
+
+    _paragraph_box(
+        slide,
+        [
+            "Madurez: valor normalizado del nivel CMMI.",
+            "Brecha: distancia entre situacion actual y objetivo.",
+            "Brecha ponderada: brecha multiplicada por peso del control.",
+            "Prioridad: brecha asociada + aporte esperado del proyecto.",
+        ],
+        Inches(0.85),
+        Inches(3.35),
+        Inches(5.4),
+        Inches(2.25),
+        "Definiciones de medicion",
+    )
+    _paragraph_box(
+        slide,
+        [
+            "Observado: inventario, roles, activos y evidencia del caso.",
+            "Definido: nivel CMMI, hallazgos, proyectos y vinculos.",
+            "Derivado: madurez, brecha, quick wins y trazabilidad.",
+        ],
+        Inches(6.8),
+        Inches(3.35),
+        Inches(5.35),
+        Inches(2.25),
+        "Separacion de datos",
+    )
+
+
 def _slide_maturity_distribution(prs: Presentation, result: MetricResult) -> None:
     slide = _blank_slide(prs, "Distribucion CMMI", "Resultados")
     dist = result.madurez_distribucion.copy()
@@ -394,14 +526,49 @@ def _slide_maturity_distribution(prs: Presentation, result: MetricResult) -> Non
     )
 
 
+def _slide_profile(prs: Presentation, result: MetricResult) -> None:
+    slide = _blank_slide(prs, "Perfil de seguridad", "Lectura operacional")
+    frame = result.capacidad_operacional.copy().head(8)
+    labels = [str(value) for value in frame["atributo"]]
+    values = [round(float(value), 1) for value in frame["madurez_pct"]]
+    _bar_chart(slide, labels, values, Inches(0.85), Inches(1.55), Inches(7.4), Inches(4.75), "Madurez por capacidad operacional", PURPLE)
+
+    weakest = frame.iloc[0]
+    _metric_card(slide, "Capacidad mas debil", f"{float(weakest['madurez_pct']):.1f}%", str(weakest["atributo"]), Inches(8.75), Inches(1.55), Inches(3.65), Inches(1.05), RED)
+    _paragraph_box(
+        slide,
+        [
+            "Esta vista traduce controles ISO a capacidades de gestion.",
+            "Para TecnoHogar, amenazas y vulnerabilidades quedan como alerta principal.",
+            "La lectura apoya proyectos de hardening, monitoreo y SDLC seguro.",
+        ],
+        Inches(8.75),
+        Inches(3.0),
+        Inches(3.65),
+        Inches(2.25),
+        "Interpretacion",
+    )
+
+
 def _slide_top_gaps(prs: Presentation, result: MetricResult) -> None:
     slide = _blank_slide(prs, "Brechas principales", "Prioridades")
     top = result.top_brechas.copy().head(8)
     labels = [f"{row.control_id}" for row in top.itertuples()]
-    values = [round(float(value), 1) for value in top["brecha_pct"]]
-    _bar_chart(slide, labels, values, Inches(0.75), Inches(1.55), Inches(6.6), Inches(4.7), "Top controles por brecha", RED)
+    values = [round(float(value), 2) for value in top["peso_brecha"]]
+    _bar_chart(
+        slide,
+        labels,
+        values,
+        Inches(0.75),
+        Inches(1.55),
+        Inches(6.6),
+        Inches(4.7),
+        "Top controles por brecha ponderada",
+        RED,
+        max_scale_floor=None,
+    )
 
-    table = top.loc[:, ["control_id", "control_nombre", "capitulo", "brecha_pct"]].head(5)
+    table = top.loc[:, ["control_id", "control_nombre", "capitulo", "brecha_pct", "peso_brecha"]].head(5)
     x, y = Inches(7.65), Inches(1.35)
     _textbox(slide, "Lectura de las brechas", x, y, Inches(4.7), Inches(0.3), Pt(12), NAVY, bold=True)
     for idx, row in enumerate(table.itertuples(index=False), start=0):
@@ -409,16 +576,17 @@ def _slide_top_gaps(prs: Presentation, result: MetricResult) -> None:
         _card(slide, x, yy, Inches(4.65), Inches(0.62))
         _textbox(slide, str(row.control_id), x + Inches(0.12), yy + Inches(0.12), Inches(0.55), Inches(0.2), Pt(10), RED, bold=True)
         _textbox(slide, str(row.control_nombre), x + Inches(0.72), yy + Inches(0.09), Inches(2.95), Inches(0.22), Pt(8), NAVY, bold=True)
-        _textbox(slide, str(row.capitulo), x + Inches(0.72), yy + Inches(0.34), Inches(2.95), Inches(0.18), Pt(7), MUTED)
-        _textbox(slide, f"{float(row.brecha_pct):.1f}%", x + Inches(3.82), yy + Inches(0.18), Inches(0.65), Inches(0.2), Pt(10), RED, bold=True, align=PP_ALIGN.RIGHT)
+        detail = f"{row.capitulo} | brecha cruda {float(row.brecha_pct):.0f}%"
+        _textbox(slide, detail, x + Inches(0.72), yy + Inches(0.34), Inches(2.95), Inches(0.18), Pt(7), MUTED)
+        _textbox(slide, f"{float(row.peso_brecha):.2f}", x + Inches(3.82), yy + Inches(0.18), Inches(0.65), Inches(0.2), Pt(10), RED, bold=True, align=PP_ALIGN.RIGHT)
 
 
 def _slide_plan(prs: Presentation, result: MetricResult) -> None:
-    slide = _blank_slide(prs, "Plan de mejora priorizado", "Decision")
+    slide = _blank_slide(prs, "Plan de accion priorizado", "Plan")
     projects = result.quick_wins.copy().head(10)
 
-    _textbox(slide, "Matriz impacto / esfuerzo", Inches(0.75), Inches(1.24), Inches(4.8), Inches(0.28), Pt(12), NAVY, bold=True)
-    matrix_x, matrix_y, matrix_w, matrix_h = Inches(0.75), Inches(1.62), Inches(5.35), Inches(4.55)
+    _textbox(slide, "Matriz impacto / esfuerzo", Inches(0.75), Inches(1.12), Inches(4.8), Inches(0.28), Pt(12), NAVY, bold=True)
+    matrix_x, matrix_y, matrix_w, matrix_h = Inches(0.75), Inches(1.76), Inches(5.35), Inches(4.38)
     _card(slide, matrix_x, matrix_y, matrix_w, matrix_h)
     mid_x = matrix_x + matrix_w / 2
     mid_y = matrix_y + matrix_h / 2
@@ -434,7 +602,7 @@ def _slide_plan(prs: Presentation, result: MetricResult) -> None:
     _textbox(slide, "Quick wins", matrix_x + Inches(0.2), matrix_y + Inches(0.15), Inches(1.2), Inches(0.18), Pt(8), GREEN, bold=True)
     _textbox(slide, "Estrategicos", mid_x + Inches(0.2), matrix_y + Inches(0.15), Inches(1.3), Inches(0.18), Pt(8), BLUE, bold=True)
     _textbox(slide, "Esfuerzo ->", matrix_x + matrix_w - Inches(1.2), matrix_y + matrix_h + Inches(0.08), Inches(1.0), Inches(0.18), Pt(8), MUTED)
-    _textbox(slide, "Prioridad", matrix_x - Inches(0.05), matrix_y - Inches(0.3), Inches(1.0), Inches(0.18), Pt(8), MUTED)
+    _textbox(slide, "Prioridad ↑", matrix_x + Inches(0.08), matrix_y - Inches(0.26), Inches(1.05), Inches(0.18), Pt(8), MUTED)
 
     effort_max = float(projects["esfuerzo_jornadas"].max()) or 1.0
     priority_max = float(projects["prioridad"].max()) or 1.0
@@ -450,7 +618,7 @@ def _slide_plan(prs: Presentation, result: MetricResult) -> None:
         dot.line.width = Pt(1)
         _textbox(slide, str(row.proyecto_id), px + Inches(0.12), py - Inches(0.1), Inches(0.55), Inches(0.16), Pt(7), NAVY, bold=True)
 
-    _textbox(slide, "Top proyectos", Inches(6.55), Inches(1.24), Inches(5.6), Inches(0.28), Pt(12), NAVY, bold=True)
+    _textbox(slide, "Primeros frentes del plan", Inches(6.55), Inches(1.24), Inches(5.6), Inches(0.28), Pt(12), NAVY, bold=True)
     top = result.proyectos.copy().head(5)
     for idx, row in enumerate(top.itertuples(index=False), start=0):
         yy = Inches(1.62) + Inches(idx * 0.88)
@@ -460,12 +628,64 @@ def _slide_plan(prs: Presentation, result: MetricResult) -> None:
         _textbox(slide, f"{row.plazo} | {int(row.esfuerzo_jornadas)} jornadas", Inches(7.45), yy + Inches(0.36), Inches(2.4), Inches(0.18), Pt(7), MUTED)
         _textbox(slide, f"{float(row.prioridad):.1f}", Inches(11.15), yy + Inches(0.19), Inches(0.75), Inches(0.2), Pt(11), GREEN, bold=True, align=PP_ALIGN.RIGHT)
 
-    _metric_card(slide, "Cartera", str(result.resumen["proyectos"]), "proyectos vinculados a controles", Inches(6.55), Inches(6.08), Inches(2.55), Inches(0.78), PURPLE)
-    _metric_card(slide, "Quick wins", str(result.resumen["quick_wins"]), "prioridad alta/esfuerzo bajo", Inches(9.35), Inches(6.08), Inches(2.55), Inches(0.78), GREEN)
+    _textbox(
+        slide,
+        "Secuencia: quick wins de personas, incidentes y seguridad fisica; luego gobierno, IAM y SDLC; finalmente auditoria y mejora continua.",
+        Inches(6.65),
+        Inches(6.08),
+        Inches(5.45),
+        Inches(0.58),
+        Pt(9),
+        SLATE,
+        fit=True,
+    )
+
+
+def _slide_demo(prs: Presentation, result: MetricResult) -> None:
+    slide = _blank_slide(prs, "Tablero publicado", "Entrega")
+    _textbox(slide, "Vistas principales", Inches(0.75), Inches(1.28), Inches(4.4), Inches(0.3), Pt(13), NAVY, bold=True)
+    steps = [
+        ("Ejecutivo", "madurez, brecha y quick wins"),
+        ("Mapa ISO", "93 controles y distribucion CMMI"),
+        ("Brechas", "Pareto y concentracion de riesgo"),
+        ("Plan", "proyectos, esfuerzo y roadmap"),
+        ("Trazabilidad", "control -> proyecto -> evidencia"),
+    ]
+    for idx, (title, detail) in enumerate(steps):
+        y = Inches(1.8 + idx * 0.8)
+        _card(slide, Inches(0.8), y, Inches(5.1), Inches(0.56), fill=WHITE, line=BORDER)
+        _textbox(slide, title, Inches(1.0), y + Inches(0.13), Inches(1.25), Inches(0.2), Pt(10), BLUE, bold=True)
+        _textbox(slide, detail, Inches(2.25), y + Inches(0.13), Inches(3.35), Inches(0.2), Pt(9), SLATE)
+
+    _paragraph_box(
+        slide,
+        [
+            "Consulta ejecutiva del estado de seguridad.",
+            "Navegacion desde indicadores hasta controles y proyectos.",
+            "Base para seguimiento periodico del plan de mejora.",
+        ],
+        Inches(6.55),
+        Inches(1.8),
+        Inches(5.55),
+        Inches(2.3),
+        "Valor para gestion",
+    )
+    _metric_card(
+        slide,
+        "URL",
+        "https://tp2seg.streamlit.app/",
+        "tablero desplegado",
+        Inches(6.55),
+        Inches(4.55),
+        Inches(4.8),
+        Inches(0.9),
+        CYAN,
+        value_link="https://tp2seg.streamlit.app/",
+    )
 
 
 def _slide_traceability(prs: Presentation, result: MetricResult) -> None:
-    slide = _blank_slide(prs, "Trazabilidad y defensa", "Cierre")
+    slide = _blank_slide(prs, "Conclusiones y proximos pasos", "Conclusion")
     steps = [
         ("Control ISO", "93 metricas"),
         ("Evidencia", "TP1 + fuentes"),
@@ -488,15 +708,15 @@ def _slide_traceability(prs: Presentation, result: MetricResult) -> None:
     _paragraph_box(
         slide,
         [
-            "Cada grafico puede explicarse hacia atras: control, fuente, evidencia, nivel CMMI y brecha.",
-            "Cada proyecto puede explicarse hacia adelante: controles cubiertos, esfuerzo, prioridad y plazo.",
-            "El repo genera tablero, informe ejecutivo, slides HTML y PPTX como artifacts de GitHub.",
+            "Cada indicador se vincula con control, evidencia, nivel CMMI y brecha.",
+            "Cada proyecto se vincula con controles cubiertos, esfuerzo, prioridad y plazo.",
+            "La generacion automatica permite actualizar tablero, informe y presentacion con cada cambio.",
         ],
         Inches(0.75),
         Inches(3.35),
         Inches(5.6),
         Inches(2.35),
-        "Argumento de defensa",
+        "Trazabilidad de decisiones",
     )
     _paragraph_box(
         slide,
@@ -509,5 +729,185 @@ def _slide_traceability(prs: Presentation, result: MetricResult) -> None:
         Inches(3.35),
         Inches(5.4),
         Inches(2.35),
-        "Decision recomendada",
+        "Plan inmediato",
     )
+
+
+def _speaker_notes() -> list[str]:
+    return [
+        _note(
+            "Abrir con una idea simple: no mostramos una planilla, mostramos como el relevamiento del TP1 se convierte en decisiones de seguridad. La historia es **inventario -> diagnostico -> brechas -> plan**.",
+            "**ISO/IEC 27002:2022** es el catalogo de controles. **Grupo 1** identifica formalmente la entrega.",
+        ),
+        _note(
+            "No leer todos los numeros. Usar **38.4% de madurez** y **61.6% de brecha** como mensaje principal: hay base operativa, pero falta formalizacion, medicion y continuidad.",
+            "**Madurez** es el valor actual. **Brecha** es la distancia al objetivo optimizado.",
+        ),
+        _note(
+            "Presentar continuidad. El TP2 no arranca desde cero: toma activos, procesos y criticidad del TP1 para evaluar controles. Esto permite que el tablero tenga contexto de negocio.",
+            "**CID** significa confidencialidad, integridad y disponibilidad. Es la base para entender criticidad de activos.",
+        ),
+        _note(
+            "Esta slide defiende el metodo. Si preguntan de donde sale un numero, la respuesta es siempre la misma: control ISO, evidencia, nivel CMMI y peso.",
+            "**Brecha ponderada** es brecha por peso del control. **Prioridad** combina brecha, esfuerzo y aporte esperado.",
+        ),
+        _note(
+            "Evitar decir que todo esta mal. La lectura correcta es madurez media-baja y brecha distribuida. Eso justifica un plan por etapas.",
+            "**Capitulo mas debil** no significa unico problema; indica por donde empezar a mirar.",
+        ),
+        _note(
+            "Mostrar que todavia hay muchos controles en niveles iniciales o gestionados. La organizacion tiene practicas, pero pocas estan medidas sistematicamente.",
+            "**CMMI 0..5**: 0 inexistente, 1 inicial, 2 gestionado, 3 definido, 4 cuantitativo, 5 optimizado.",
+        ),
+        _note(
+            "Conectar brechas con riesgo real: accesos indebidos, continuidad operativa, evidencia insuficiente y exposicion del e-commerce.",
+            "**Pareto de brechas** ordena controles por impacto de mejora, no por orden numerico del estandar. Si la brecha cruda se repite en 85%, es porque esos controles tienen el mismo nivel CMMI; el ranking usa **brecha ponderada**.",
+        ),
+        _note(
+            "Mostrar que usamos mas de una vista. Los capitulos ISO explican cobertura; las capacidades operacionales explican decisiones de gestion y priorizacion.",
+            "**Capacidad operacional** agrupa controles por funcion de seguridad.",
+        ),
+        _note(
+            "Quick win no significa poco importante. Significa alto impacto con esfuerzo razonable frente al resto de la cartera. El plan prioriza sin ocultar que hay trabajo estructural.",
+            "**Prioridad** combina brecha asociada, esfuerzo y aporte esperado de seguridad.",
+        ),
+        _note(
+            "La demo debe durar 3 a 4 minutos. No navegar libremente: seguir Ejecutivo, Mapa ISO, Brechas, Plan y Trazabilidad.",
+            "**Trazabilidad** permite ir desde el indicador ejecutivo hasta el control y el proyecto.",
+        ),
+        _note(
+            "Cerrar con gestion. El tablero resume 93 controles en decisiones concretas: que mirar, que priorizar y como justificar el plan.",
+            "**Trazabilidad** significa poder ir desde una decision del plan hasta el control y la evidencia que la justifican.",
+        ),
+    ]
+
+
+def _note(narrative: str, references: str) -> str:
+    return f"Narrativa:\n{narrative}\n\nReferencias:\n{references}"
+
+
+def _add_speaker_notes(pptx_path: Path, notes: list[str]) -> None:
+    with zipfile.ZipFile(pptx_path, "r") as archive:
+        files = {name: archive.read(name) for name in archive.namelist()}
+
+    slide_count = len([name for name in files if re.fullmatch(r"ppt/slides/slide\d+\.xml", name)])
+    if slide_count != len(notes):
+        raise ValueError(f"La cantidad de notas ({len(notes)}) no coincide con slides ({slide_count})")
+
+    files["[Content_Types].xml"] = _with_content_type_overrides(files["[Content_Types].xml"].decode("utf-8"), slide_count).encode("utf-8")
+    files["ppt/_rels/presentation.xml.rels"] = _with_notes_master_rel(files["ppt/_rels/presentation.xml.rels"].decode("utf-8")).encode("utf-8")
+    files["ppt/notesMasters/notesMaster1.xml"] = _notes_master_xml().encode("utf-8")
+    files["ppt/notesMasters/_rels/notesMaster1.xml.rels"] = _empty_relationships_xml().encode("utf-8")
+
+    for index, note in enumerate(notes, start=1):
+        slide_rels_path = f"ppt/slides/_rels/slide{index}.xml.rels"
+        files[slide_rels_path] = _with_slide_notes_rel(files[slide_rels_path].decode("utf-8"), index).encode("utf-8")
+        files[f"ppt/notesSlides/notesSlide{index}.xml"] = _notes_slide_xml(note).encode("utf-8")
+        files[f"ppt/notesSlides/_rels/notesSlide{index}.xml.rels"] = _notes_slide_rels_xml(index).encode("utf-8")
+
+    with zipfile.ZipFile(pptx_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        for name, content in files.items():
+            archive.writestr(name, content)
+
+
+def _with_content_type_overrides(xml: str, slide_count: int) -> str:
+    overrides = [
+        '<Override PartName="/ppt/notesMasters/notesMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.notesMaster+xml"/>'
+    ]
+    overrides.extend(
+        f'<Override PartName="/ppt/notesSlides/notesSlide{index}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.notesSlide+xml"/>'
+        for index in range(1, slide_count + 1)
+    )
+    for override in overrides:
+        part_name = re.search(r'PartName="([^"]+)"', override)
+        if part_name and part_name.group(1) not in xml:
+            xml = xml.replace("</Types>", f"{override}</Types>")
+    return xml
+
+
+def _with_notes_master_rel(xml: str) -> str:
+    if "relationships/notesMaster" in xml:
+        return xml
+    rel_id = _next_rel_id(xml)
+    rel = (
+        f'<Relationship Id="{rel_id}" '
+        'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesMaster" '
+        'Target="notesMasters/notesMaster1.xml"/>'
+    )
+    return xml.replace("</Relationships>", f"{rel}</Relationships>")
+
+
+def _with_slide_notes_rel(xml: str, index: int) -> str:
+    if "relationships/notesSlide" in xml:
+        return xml
+    rel_id = _next_rel_id(xml)
+    rel = (
+        f'<Relationship Id="{rel_id}" '
+        'Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesSlide" '
+        f'Target="../notesSlides/notesSlide{index}.xml"/>'
+    )
+    return xml.replace("</Relationships>", f"{rel}</Relationships>")
+
+
+def _next_rel_id(xml: str) -> str:
+    ids = [int(value) for value in re.findall(r'Id="rId(\d+)"', xml)]
+    return f"rId{max(ids, default=0) + 1}"
+
+
+def _empty_relationships_xml() -> str:
+    return (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>'
+    )
+
+
+def _notes_master_xml() -> str:
+    return """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:notesMaster xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+  <p:cSld name="">
+    <p:spTree>
+      <p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>
+      <p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>
+    </p:spTree>
+  </p:cSld>
+  <p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/>
+</p:notesMaster>"""
+
+
+def _notes_slide_xml(note: str) -> str:
+    paragraphs = []
+    for line in note.splitlines():
+        text = line.strip()
+        if not text:
+            paragraphs.append("<a:p/>")
+            continue
+        bold = ' b="1"' if text in {"Narrativa:", "Referencias:"} else ""
+        paragraphs.append(f'<a:p><a:r><a:rPr lang="es-AR" sz="1200"{bold}/><a:t>{_xml_escape(text)}</a:t></a:r></a:p>')
+    body = "".join(paragraphs)
+    return f"""<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<p:notes xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
+  <p:cSld>
+    <p:spTree>
+      <p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>
+      <p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>
+      <p:sp>
+        <p:nvSpPr><p:cNvPr id="2" name="Speaker notes"/><p:cNvSpPr/><p:nvPr><p:ph type="body" idx="1"/></p:nvPr></p:nvSpPr>
+        <p:spPr/>
+        <p:txBody><a:bodyPr/><a:lstStyle/>{body}</p:txBody>
+      </p:sp>
+    </p:spTree>
+  </p:cSld>
+  <p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr>
+</p:notes>"""
+
+
+def _notes_slide_rels_xml(index: int) -> str:
+    return f"""<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="../slides/slide{index}.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesMaster" Target="../notesMasters/notesMaster1.xml"/>
+</Relationships>"""
+
+
+def _xml_escape(text: str) -> str:
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")

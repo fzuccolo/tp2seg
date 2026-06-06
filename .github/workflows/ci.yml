@@ -49,7 +49,7 @@ jobs:
       - name: Upload downloadable deliverables
         uses: actions/upload-artifact@v4
         with:
-          name: tp2-tecnohogar-entregables
+          name: tp2-grupo1-tecnohogar-entregables
           path: .build/entregables/
           if-no-files-found: error
           retention-days: 90
@@ -61,9 +61,9 @@ jobs:
           RELEASE_TAG: entregables-${{ steps.meta.outputs.timestamp }}
         run: |
           gh release create "$RELEASE_TAG" \
-            .build/entregables/tp2-tecnohogar-presentacion.pptx \
-            .build/entregables/tp2-tecnohogar-informe.pdf \
-            .build/entregables/tp2-tecnohogar-entregables.zip \
+            .build/entregables/tp2-grupo1-tecnohogar-presentacion.pptx \
+            .build/entregables/tp2-grupo1-tecnohogar-informe.pdf \
+            .build/entregables/tp2-grupo1-tecnohogar-entregables.zip \
             --title "Entregables TP2 ${{ steps.meta.outputs.timestamp }}" \
             --notes "Descargas generadas por CI: presentacion PPTX, informe PDF y ZIP completo." \
             --latest
@@ -76,12 +76,12 @@ jobs:
             if [ "${GITHUB_EVENT_NAME}" = "push" ] && [ "${GITHUB_REF}" = "refs/heads/main" ]; then
               echo "Descarga permanente desde la ultima Release:"
               echo ""
-              echo "- PPTX: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/latest/download/tp2-tecnohogar-presentacion.pptx"
-              echo "- PDF: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/latest/download/tp2-tecnohogar-informe.pdf"
-              echo "- ZIP: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/latest/download/tp2-tecnohogar-entregables.zip"
+              echo "- PPTX: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/latest/download/tp2-grupo1-tecnohogar-presentacion.pptx"
+              echo "- PDF: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/latest/download/tp2-grupo1-tecnohogar-informe.pdf"
+              echo "- ZIP: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/latest/download/tp2-grupo1-tecnohogar-entregables.zip"
               echo ""
             fi
-            echo "Artifact temporal de esta corrida: **tp2-tecnohogar-entregables**."
+            echo "Artifact temporal de esta corrida: **tp2-grupo1-tecnohogar-entregables**."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Update deploy branch
