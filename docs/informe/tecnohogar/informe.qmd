@@ -1,5 +1,5 @@
 ---
-title: "Informe TP2 - Tablero de Control de Seguridad"
+title: "Informe Ejecutivo - Tablero de Control de Seguridad"
 subtitle: "TecnoHogar S.A."
 format:
   html:

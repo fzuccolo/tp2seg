@@ -100,14 +100,27 @@ Luego de `make build`, las salidas quedan en:
 
 ## CI
 
-El workflow `.github/workflows/ci.yml` corre en cada push a `main`:
+El workflow `.github/workflows/ci.yml` corre en cada push a `main` y tambien se puede ejecutar manualmente desde GitHub Actions:
 
 1. Instala Python y dependencias.
 2. Instala Quarto.
 3. Valida los datos.
 4. Ejecuta tests.
 5. Genera informe, slides y metricas.
-6. Publica `.build/` como artifact descargable.
+6. Publica artifacts descargables.
+
+Artifacts principales:
+
+- `tp2-tecnohogar-presentacion`: presentacion HTML lista para exponer.
+- `tp2-tecnohogar-informe-ejecutivo`: informe ejecutivo HTML.
+- `tp2-build-completo`: metricas, CSV, informe, slides y salidas completas.
+
+Para descargarlos en GitHub:
+
+1. Entrar a **Actions**.
+2. Abrir la ultima corrida de **CI y Entregables TP2**.
+3. Bajar hasta **Artifacts**.
+4. Descargar `tp2-tecnohogar-presentacion` o `tp2-tecnohogar-informe-ejecutivo`.
 
 ## Deploy del tablero
 
