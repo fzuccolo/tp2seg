@@ -44,6 +44,7 @@ jobs:
         with:
           name: build-tp2
           path: .build/
+          include-hidden-files: true
           retention-days: 30
 
       - name: Update deploy branch
