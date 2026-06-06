@@ -54,7 +54,8 @@ QUADRANT_COLORS = {
     "Mejora tactica": "#f59e0b",
     "Diferir": "#64748b",
 }
-DASHBOARD_CACHE_VERSION = "story-dashboard-v3"
+DEFAULT_COMPANY = "tecnohogar"
+DASHBOARD_CACHE_VERSION = "story-dashboard-v4"
 
 
 @st.cache_data
@@ -340,7 +341,7 @@ def download_button(label: str, df: pd.DataFrame, filename: str) -> None:
     st.download_button(label, df.to_csv(index=False).encode("utf-8"), file_name=filename, mime="text/csv")
 
 
-st.set_page_config(page_title="TP2 Seguridad - Tablero", layout="wide")
+st.set_page_config(page_title="TP2 Seguridad - Tablero", layout="wide", initial_sidebar_state="collapsed")
 st.markdown(
     """
     <style>
@@ -403,7 +404,7 @@ st.markdown(
 )
 
 companies = list_companies(ROOT)
-default_idx = companies.index("ejemplo") if "ejemplo" in companies else 0
+default_idx = companies.index(DEFAULT_COMPANY) if DEFAULT_COMPANY in companies else 0
 selected = st.sidebar.selectbox("Empresa", companies, index=default_idx)
 result = get_result(selected, DASHBOARD_CACHE_VERSION)
 resumen = result.resumen
