@@ -115,7 +115,7 @@ def validate_company(company_dir: Path, standards_dir: Path) -> None:
     catalogo, valid_levels = validate_standard(standards_dir / str(standard_id))
     known_controls = set(catalogo["control_id"].astype(str))
 
-    read_csv(company_dir / "activos.csv")
+    activos = read_csv(company_dir / "activos.csv")
     diagnostico = read_csv(company_dir / "diagnostico.csv")
     proyectos = read_csv(company_dir / "proyectos.csv")
     proyecto_control = read_csv(company_dir / "proyecto_control.csv")
@@ -153,6 +153,37 @@ def validate_company(company_dir: Path, standards_dir: Path) -> None:
             raise ValueError(f"{company_dir}: ejemplo debe conservar 45 proyectos de referencia")
         if len(proyecto_control) != 93:
             raise ValueError(f"{company_dir}: ejemplo debe conservar 93 vinculos control-proyecto")
+
+    if company_dir.name == "tecnohogar":
+        missing_diag = known_controls - diag_controls
+        if len(diagnostico) != 93 or missing_diag:
+            raise ValueError(f"{company_dir}: tecnohogar debe cubrir los 93 controles ISO, faltan {sorted(missing_diag)}")
+        if len(activos) != 41:
+            raise ValueError(f"{company_dir}: tecnohogar debe conservar los 41 activos del TP1")
+        if len(entrevistas) < 6:
+            raise ValueError(f"{company_dir}: tecnohogar debe registrar las 6 entrevistas/fuentes principales")
+
+        required_asset_detail = {"confidencialidad", "integridad", "disponibilidad"}
+        missing_asset_detail = required_asset_detail - set(activos.columns)
+        if missing_asset_detail:
+            raise ValueError(f"{company_dir}: activos.csv sin columnas CID {sorted(missing_asset_detail)}")
+
+        info_assets = activos[activos["tipo"].astype(str).str.lower() == "informacion"].copy()
+        if len(info_assets) != 13:
+            raise ValueError(f"{company_dir}: tecnohogar debe conservar 13 activos de informacion del TP1")
+        for column in required_asset_detail | {"criticidad_cid"}:
+            values = pd.to_numeric(info_assets[column], errors="coerce")
+            if values.isna().any() or not values.between(1, 5).all():
+                raise ValueError(f"{company_dir}: {column} debe estar completo con valores 1..5 para activos de informacion")
+
+        weak = diagnostico[pd.to_numeric(diagnostico["nivel_madurez"], errors="coerce").fillna(0).astype(int) <= 2].copy()
+        for column in ["hallazgo", "observaciones"]:
+            if column not in weak.columns or weak[column].fillna("").astype(str).str.strip().eq("").any():
+                raise ValueError(f"{company_dir}: controles debiles deben tener {column}")
+        linked_controls = set(proyecto_control["control_id"].astype(str))
+        weak_without_project = set(weak["control_id"].astype(str)) - linked_controls
+        if weak_without_project:
+            raise ValueError(f"{company_dir}: controles debiles sin proyecto asociado {sorted(weak_without_project)}")
 
 
 def main() -> int:

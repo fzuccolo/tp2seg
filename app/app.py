@@ -55,7 +55,8 @@ QUADRANT_COLORS = {
     "Diferir": "#64748b",
 }
 DEFAULT_COMPANY = "tecnohogar"
-DASHBOARD_CACHE_VERSION = "story-dashboard-v4"
+DASHBOARD_CACHE_VERSION = "story-dashboard-v7"
+PLOTLY_CONFIG = {"responsive": True, "displayModeBar": "hover", "displaylogo": False, "scrollZoom": True}
 
 
 @st.cache_data
@@ -78,6 +79,10 @@ def short_text(value: str, limit: int = 48) -> str:
     return text if len(text) <= limit else text[: limit - 1] + "…"
 
 
+def treemap_label(control_id: str, control_name: str, limit: int = 24) -> str:
+    return f"{control_id}<br>{short_text(control_name, limit)}"
+
+
 def ordered_chapters(df: pd.DataFrame) -> pd.DataFrame:
     if "capitulo" not in df.columns:
         return df
@@ -94,9 +99,33 @@ def chart_layout(fig: go.Figure, height: int = 420, showlegend: bool = True) -> 
         plot_bgcolor="rgba(0,0,0,0)",
         font={"family": "Inter, system-ui, sans-serif", "size": 12, "color": "#111827"},
         legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
+        modebar={
+            "bgcolor": "rgba(255, 255, 255, 0.72)",
+            "color": "rgba(71, 85, 105, 0.42)",
+            "activecolor": "#2563eb",
+        },
         showlegend=showlegend,
     )
     return fig
+
+
+def show_chart(fig: go.Figure) -> None:
+    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
+
+
+def style_treemap(fig: go.Figure, title: str, height: int = 560) -> go.Figure:
+    fig.update_traces(
+        textinfo="label",
+        textfont={"size": 12},
+        marker={"line": {"width": 1.2, "color": "#ffffff"}},
+        tiling={"pad": 2},
+    )
+    fig.update_layout(
+        title=title,
+        uniformtext={"minsize": 10, "mode": "hide"},
+        font={"family": "Inter, system-ui, sans-serif", "size": 12, "color": "#111827"},
+    )
+    return chart_layout(fig, height=height, showlegend=False)
 
 
 def section_title(title: str, detail: str = "") -> None:
@@ -425,6 +454,11 @@ filtered = controles[
     & controles["madurez_nombre"].isin(selected_maturity)
     & controles["entrevistado"].isin(selected_interviewees if selected_interviewees else available_interviewees)
 ].copy()
+if filtered.empty:
+    st.sidebar.warning("Los filtros no devuelven controles; se muestran todos los controles.")
+    visible_controls = controles.copy()
+else:
+    visible_controls = filtered
 
 story_tabs = st.tabs(["1 Ejecutivo", "2 Mapa ISO", "3 Perfil", "4 Brechas", "5 Plan", "6 Trazabilidad", "7 Descargas"])
 tab_resumen, tab_mapa, tab_perfil, tab_brechas, tab_plan, tab_trazabilidad, tab_descargas = story_tabs
@@ -445,7 +479,7 @@ with tab_resumen:
     left, center, right = st.columns([1, 1.3, 1.1])
     with left:
         section_title("Postura general")
-        st.plotly_chart(gauge_chart(resumen["madurez_global_pct"], "Madurez global"), width="stretch")
+        show_chart(gauge_chart(resumen["madurez_global_pct"], "Madurez global"))
     with center:
         section_title("Madurez por capitulo")
         caps = ordered_chapters(result.capitulos.copy())
@@ -460,7 +494,7 @@ with tab_resumen:
             range_y=[0, 100],
         )
         fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
-        st.plotly_chart(chart_layout(fig, height=330, showlegend=False), width="stretch")
+        show_chart(chart_layout(fig, height=330, showlegend=False))
     with right:
         section_title("Distribucion CMMI")
         dist = result.madurez_distribucion.copy()
@@ -472,18 +506,23 @@ with tab_resumen:
             color="madurez_nombre",
             color_discrete_map=MATURITY_COLORS,
         )
-        st.plotly_chart(chart_layout(fig, height=330), width="stretch")
+        show_chart(chart_layout(fig, height=330))
 
     r1, r2 = st.columns(2)
     with r1:
         section_title("Radar ejecutivo")
         caps_radar = ordered_chapters(result.capitulos.copy())
-        st.plotly_chart(radar_chart(caps_radar, "capitulo", "madurez_pct", "Madurez por capitulo", "#2563eb"), width="stretch")
+        show_chart(radar_chart(caps_radar, "capitulo", "madurez_pct", "Madurez por capitulo", "#2563eb"))
     with r2:
         section_title("Capacidades operacionales")
-        st.plotly_chart(
-            radar_chart(result.capacidad_operacional.sort_values("madurez_pct").head(12), "atributo", "madurez_pct", "Capacidad operacional", "#7c3aed"),
-            width="stretch",
+        show_chart(
+            radar_chart(
+                result.capacidad_operacional.sort_values("madurez_pct").head(12),
+                "atributo",
+                "madurez_pct",
+                "Capacidad operacional",
+                "#7c3aed",
+            )
         )
 
 with tab_mapa:
@@ -500,7 +539,7 @@ with tab_mapa:
             color_continuous_scale="Blues",
             labels={"x": "Nivel CMMI", "y": "Capitulo", "color": "Controles"},
         )
-        st.plotly_chart(chart_layout(fig, height=440, showlegend=False), width="stretch")
+        show_chart(chart_layout(fig, height=440, showlegend=False))
     with m2:
         section_title("CMMI por capitulo")
         stacked = maturity_stack(ordered_chapters(result.matriz_madurez.copy()))
@@ -512,11 +551,11 @@ with tab_mapa:
             color_discrete_map=MATURITY_COLORS,
             labels={"capitulo": "", "controles": "Controles", "madurez": "Madurez"},
         )
-        st.plotly_chart(chart_layout(fig, height=440), width="stretch")
+        show_chart(chart_layout(fig, height=440))
 
     section_title("Superficie de controles")
-    treemap_df = filtered.copy()
-    treemap_df["control_label"] = treemap_df["control_id"].astype(str) + " · " + treemap_df["control_nombre"].map(lambda x: short_text(x, 42))
+    treemap_df = visible_controls.copy()
+    treemap_df["control_label"] = treemap_df.apply(lambda row: treemap_label(row["control_id"], row["control_nombre"]), axis=1)
     fig = px.treemap(
         treemap_df,
         path=["capitulo", "control_label"],
@@ -526,14 +565,13 @@ with tab_mapa:
         range_color=[0, 100],
         hover_data=["madurez_nombre", "peso_brecha", "entrevistado"],
     )
-    fig.update_layout(title="Controles por capitulo coloreados por madurez")
-    st.plotly_chart(chart_layout(fig, height=560, showlegend=False), width="stretch")
+    show_chart(style_treemap(fig, "Controles por capitulo coloreados por madurez", height=590))
 
 with tab_perfil:
     p1, p2 = st.columns([1, 1.2])
     with p1:
         section_title("Funciones de ciberseguridad")
-        st.plotly_chart(radar_chart(result.ciberfunciones, "atributo", "madurez_pct", "Funciones", "#0891b2"), width="stretch")
+        show_chart(radar_chart(result.ciberfunciones, "atributo", "madurez_pct", "Funciones", "#0891b2"))
     with p2:
         section_title("Capacidad operacional")
         cap = result.capacidad_operacional.sort_values("madurez_pct", ascending=True)
@@ -549,7 +587,7 @@ with tab_perfil:
             labels={"madurez_pct": "Madurez %", "atributo": "", "brecha_pct": "Brecha %"},
         )
         fig.update_traces(texttemplate="%{text:.1f}%")
-        st.plotly_chart(chart_layout(fig, height=520, showlegend=False), width="stretch")
+        show_chart(chart_layout(fig, height=520, showlegend=False))
 
     s1, s2, s3 = st.columns(3)
     with s1:
@@ -565,7 +603,7 @@ with tab_perfil:
             range_x=[0, 100],
             labels={"madurez_pct": "Madurez %", "atributo": ""},
         )
-        st.plotly_chart(chart_layout(fig, height=390, showlegend=False), width="stretch")
+        show_chart(chart_layout(fig, height=390, showlegend=False))
     with s2:
         section_title("Tipo de control")
         fig = px.bar(
@@ -579,7 +617,7 @@ with tab_perfil:
             range_x=[0, 100],
             labels={"madurez_pct": "Madurez %", "atributo": ""},
         )
-        st.plotly_chart(chart_layout(fig, height=390, showlegend=False), width="stretch")
+        show_chart(chart_layout(fig, height=390, showlegend=False))
     with s3:
         section_title("Dominios")
         fig = px.bar(
@@ -593,17 +631,17 @@ with tab_perfil:
             range_x=[0, 100],
             labels={"madurez_pct": "Madurez %", "atributo": ""},
         )
-        st.plotly_chart(chart_layout(fig, height=390, showlegend=False), width="stretch")
+        show_chart(chart_layout(fig, height=390, showlegend=False))
 
 with tab_brechas:
     section_title("Pareto de brechas")
-    st.plotly_chart(pareto_chart(filtered, "Controles que explican la brecha"), width="stretch")
+    show_chart(pareto_chart(visible_controls, "Controles que explican la brecha"))
 
     b1, b2 = st.columns([1.05, 1])
     with b1:
         section_title("Concentracion de riesgo")
-        risk_df = filtered.copy()
-        risk_df["control_label"] = risk_df["control_id"].astype(str) + " · " + risk_df["control_nombre"].map(lambda x: short_text(x, 36))
+        risk_df = visible_controls.copy()
+        risk_df["control_label"] = risk_df.apply(lambda row: treemap_label(row["control_id"], row["control_nombre"]), axis=1)
         fig = px.treemap(
             risk_df.sort_values("peso_brecha", ascending=False).head(35),
             path=["capitulo", "control_label"],
@@ -612,12 +650,11 @@ with tab_brechas:
             color_continuous_scale=["#fef3c7", "#f97316", "#991b1b"],
             hover_data=["madurez_nombre", "hallazgo", "entrevistado"],
         )
-        fig.update_layout(title="Brecha por capitulo y control")
-        st.plotly_chart(chart_layout(fig, height=520, showlegend=False), width="stretch")
+        show_chart(style_treemap(fig, "Brecha por capitulo y control", height=560))
     with b2:
         section_title("Madurez vs brecha")
         fig = px.scatter(
-            filtered,
+            visible_controls,
             x="cumplimiento_pct",
             y="peso_brecha",
             color="capitulo",
@@ -628,7 +665,7 @@ with tab_brechas:
             color_discrete_map=CHAPTER_COLORS,
         )
         fig.add_vline(x=70, line_width=1, line_dash="dash", line_color="#94a3b8")
-        st.plotly_chart(chart_layout(fig, height=520), width="stretch")
+        show_chart(chart_layout(fig, height=520))
 
     table_cols = [
         "control_id",
@@ -641,7 +678,7 @@ with tab_brechas:
         "hallazgo",
         "observaciones",
     ]
-    st.dataframe(filtered[table_cols].sort_values("peso_brecha", ascending=False), width="stretch", hide_index=True)
+    st.dataframe(visible_controls[table_cols].sort_values("peso_brecha", ascending=False), width="stretch", hide_index=True)
 
 with tab_plan:
     q1, q2, q3, q4 = st.columns(4)
@@ -667,15 +704,15 @@ with tab_plan:
             color_discrete_map={"Corto": "#16a34a", "Medio": "#f59e0b", "Largo": "#dc2626", "": "#64748b"},
             labels={"prioridad": "Prioridad acumulada", "plazo": "Plazo"},
         )
-        st.plotly_chart(chart_layout(fig, height=380, showlegend=False), width="stretch")
+        show_chart(chart_layout(fig, height=380, showlegend=False))
     with p2:
         section_title("Compromiso por plazo")
         fig = px.pie(plazo, names="plazo", values="proyectos", hole=0.5, color="plazo", color_discrete_sequence=PALETTE)
-        st.plotly_chart(chart_layout(fig, height=380), width="stretch")
+        show_chart(chart_layout(fig, height=380))
     with p3:
         section_title("Tipo de proyecto")
         fig = px.pie(result.proyectos_tipo, names="tipo", values="controles", hole=0.5, color_discrete_sequence=PALETTE)
-        st.plotly_chart(chart_layout(fig, height=380), width="stretch")
+        show_chart(chart_layout(fig, height=380))
 
     p4, p5 = st.columns([1, 1.1])
     with p4:
@@ -690,19 +727,19 @@ with tab_plan:
             color_discrete_map=CHAPTER_COLORS,
             labels={"prioridad": "Prioridad", "capitulo": ""},
         )
-        st.plotly_chart(chart_layout(fig, height=430, showlegend=False), width="stretch")
+        show_chart(chart_layout(fig, height=430, showlegend=False))
     with p5:
         section_title("Plan por capacidad operacional")
         cap_plan_radar = result.proyectos_capacidad.sort_values("prioridad", ascending=False).head(12)
-        st.plotly_chart(radar_chart(cap_plan_radar, "capacidad", "prioridad_pct", "Prioridad relativa por capacidad", "#0891b2"), width="stretch")
+        show_chart(radar_chart(cap_plan_radar, "capacidad", "prioridad_pct", "Prioridad relativa por capacidad", "#0891b2"))
 
     e1, e2 = st.columns([1.05, 1])
     with e1:
         section_title("Roadmap de esfuerzo")
-        st.plotly_chart(roadmap_chart(result.esfuerzo_roadmap), width="stretch")
+        show_chart(roadmap_chart(result.esfuerzo_roadmap))
     with e2:
         section_title("Quick wins")
-        st.plotly_chart(impact_matrix(result.quick_wins), width="stretch")
+        show_chart(impact_matrix(result.quick_wins))
 
     section_title("Esfuerzo por proyecto")
     effort = result.proyectos.sort_values("esfuerzo_jornadas", ascending=False).head(18).copy()
@@ -717,7 +754,7 @@ with tab_plan:
         color_discrete_sequence=PALETTE,
         labels={"esfuerzo_jornadas": "Jornadas", "label": ""},
     )
-    st.plotly_chart(chart_layout(fig, height=560), width="stretch")
+    show_chart(chart_layout(fig, height=560))
 
     project_table = result.quick_wins[
         [
@@ -737,7 +774,7 @@ with tab_plan:
 
 with tab_trazabilidad:
     section_title("Cadena de decision")
-    st.plotly_chart(sankey_chart(result.trazabilidad), width="stretch")
+    show_chart(sankey_chart(result.trazabilidad))
 
     t1, t2 = st.columns([1, 1.1])
     with t1:

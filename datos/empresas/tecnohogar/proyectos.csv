@@ -1,9 +1,12 @@
-proyecto_id,titulo,plazo,esfuerzo_jornadas,aporte_seguridad,descripcion,dependencias
-PR-01,Marco normativo y gobierno SGSI,Corto,18,0.16,Formalizar politicas roles RACI y gobierno de seguridad,
-PR-02,IAM MFA y revision de privilegios,Corto,24,0.18,Implantar MFA y proceso periodico de revision de accesos,PR-01
-PR-03,Gestion de vulnerabilidades y pruebas,Medio,30,0.17,Definir escaneos remediacion y pruebas de seguridad recurrentes,PR-01
-PR-04,SIEM logs y monitoreo,Medio,28,0.15,Centralizar logs definir alertas y monitoreo de eventos criticos,PR-01
-PR-05,Continuidad backups y restauracion,Corto,20,0.12,Probar restauracion y definir continuidad de servicios TIC,PR-01
-PR-06,Seguridad en desarrollo y WAF,Medio,26,0.12,Integrar controles de seguridad al SDLC y proteger e-commerce,PR-03
-PR-07,Proteccion de datos personales y PCI-DSS,Medio,22,0.10,Alinear datos personales y pagos a requisitos legales y contractuales,PR-01
-PR-08,Concientizacion y respuesta a incidentes,Corto,16,0.10,Capacitar usuarios y formalizar gestion de incidentes,PR-01
+proyecto_id,titulo,plazo,esfuerzo_jornadas,aporte_seguridad,descripcion,dependencias,tipo_seguridad,controles_esperados,logica,fisica,organizativa,legal,costo,meses
+PR-01,"Gobierno SGSI, politicas y RACI",Corto,58,0.18,"Formalizar politica de seguridad, comite, roles, revision periodica y tablero de seguimiento.",,Organizativa,11,0,0,11,0,8700000,2.6
+PR-02,"Gestion de activos, clasificacion y tratamiento",Corto,46,0.14,"Mantener el inventario TP1, extender etiquetado, reglas de uso y tratamiento de informacion critica.",PR-01,Organizativa,11,0,0,11,0,6900000,2.1
+PR-03,"IAM, MFA y segregacion de funciones",Corto,72,0.2,"Ordenar identidades, accesos privilegiados, MFA, revisiones periodicas y matriz de funciones incompatibles.",PR-01,Logica,9,9,0,0,0,10800000,3.3
+PR-04,"Proveedores, cloud, privacidad y PCI-DSS",Medio,64,0.16,"Definir anexos de seguridad, evaluacion de proveedores, gobierno cloud y obligaciones legales sobre PII y pagos.","PR-01,PR-02",Legal,9,0,0,0,9,9600000,2.9
+PR-05,"Incidentes, SIEM, logs y evidencia digital",Corto,54,0.19,"Formalizar respuesta a incidentes, clasificacion de eventos, preservacion de evidencia y monitoreo centralizado.",PR-01,Logica,10,10,0,0,0,8100000,2.5
+PR-06,"Continuidad, backups y recuperacion",Medio,48,0.13,"Definir RTO/RPO, pruebas de restauracion, continuidad TIC y criterios de seguridad durante interrupciones.","PR-01,PR-05",Logica,5,5,0,0,0,7200000,2.2
+PR-07,Seguridad fisica de oficinas y centros de distribucion,Medio,42,0.11,"Unificar controles de acceso fisico, monitoreo, areas seguras, medios y baja segura de equipos.",PR-01,Fisica,14,0,14,0,0,6300000,1.9
+PR-08,"Hardening, malware, redes y vulnerabilidades",Corto,68,0.21,"Implantar hardening, gestion de configuracion, EDR, escaneo recurrente, segmentacion y web filtering.",PR-03,Logica,10,10,0,0,0,10200000,3.1
+PR-09,"SDLC seguro, WAF, APIs y pruebas",Medio,76,0.22,"Integrar requisitos de seguridad, codificacion segura, pruebas, separacion de ambientes y proteccion del e-commerce.",PR-08,Logica,8,8,0,0,0,11400000,3.5
+PR-10,Concientizacion y ciclo de vida RRHH,Corto,36,0.12,"Fortalecer induccion, capacitacion, teletrabajo, confidencialidad, desvinculacion y reporte de eventos.",PR-01,Organizativa,8,0,0,8,0,5400000,1.6
+PR-11,"Auditoria, metricas y mejora continua",Largo,40,0.1,"Programar revisiones independientes, pruebas de auditoria tecnica y seguimiento de indicadores del tablero.","PR-01,PR-05",Organizativa,7,0,0,7,0,6000000,1.8

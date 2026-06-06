@@ -1,0 +1,7 @@
+entrevista_id,nombre,area,empresa,cargo,fecha,fuente
+ET-01,Juan Castillo,Gerencia General,TecnoHogar S.A.,Propietario de procesos comerciales y operativos,2026-06-04,"TP1 roles y areas; validacion de procesos PN-01, PN-03, PN-04 y PN-05"
+ET-02,Laura Mendez,Gerencia de Finanzas,TecnoHogar S.A.,"Propietaria de pagos, proveedores e informacion financiera",2026-06-04,"TP1 roles y areas; activos DI-02, DI-07, DI-09, AP-04 y AP-08"
+ET-03,Susana Ortiz,Gerencia de RRHH,TecnoHogar S.A.,Propietaria de RRHH y liquidacion,2026-06-04,TP1 roles y areas; proceso PN-06 y activos DI-08a..DI-08d
+ET-04,Paula Ferreira,Gestion de Tecnologia,TecnoHogar S.A.,"Propietaria de aplicaciones, servidores y bases de datos",2026-06-04,TP1 roles y areas; aplicaciones AP-01..AP-10 y servidores SV-01..SV-12
+ET-05,Diego Sosa,Gerencia General / Tecnologia,TecnoHogar S.A.,Custodio tecnico transversal,2026-06-04,"TP1 roles y areas; operacion de e-commerce, pagos, WMS, TMS y soporte"
+ET-06,Martin Rojas,Gerencia de RRHH / Tecnologia,TecnoHogar S.A.,"Custodio de BD, backups, SIEM y activos RRHH",2026-06-04,"TP1 roles y areas; BD, backups, SIEM y legajos digitales"

@@ -24,7 +24,7 @@ docs/       Fuentes Quarto de informes y presentaciones
 ## Empresas
 
 - `ejemplo`: dataset importado desde el trabajo de referencia G1 para calibrar el formato, el tablero y los graficos.
-- `tecnohogar`: caso principal del TP2; hoy conserva datos semilla y se completa en la siguiente etapa.
+- `tecnohogar`: caso principal del TP2, derivado del TP1 y cubriendo los 93 controles ISO/IEC 27002:2022.
 
 ## Uso local
 
@@ -58,6 +58,18 @@ Reimportar el caso ejemplo desde los Excel de la catedra:
 
 ```bash
 make import-example
+```
+
+Regenerar el caso TecnoHogar desde el inventario del TP1 y el catalogo ISO:
+
+```bash
+make generate-tecnohogar
+```
+
+Si el Excel TP1 esta en otra ruta:
+
+```bash
+TP1_TECNOHOGAR_XLSX=/ruta/TP1_Inventario_TecnoHogar_v2.xlsx make generate-tecnohogar
 ```
 
 Levantar el tablero:

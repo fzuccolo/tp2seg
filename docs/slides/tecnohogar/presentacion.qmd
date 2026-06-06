@@ -1,33 +1,309 @@
 ---
-title: "TP2 - Tablero de Control de Seguridad"
-subtitle: "TecnoHogar S.A."
+title: "Tablero de Control de Seguridad"
+subtitle: "TecnoHogar S.A. | ISO/IEC 27002:2022"
 format:
   revealjs:
     theme: simple
     slide-number: true
     chalkboard: false
+    transition: fade
+    width: 1280
+    height: 720
 execute:
   echo: false
 ---
 
-## Caso
+<style>
+.reveal h2 {
+  color: #0f172a;
+}
+.reveal strong {
+  color: #1d4ed8;
+}
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.metric-card {
+  border: 1px solid #dbe3ef;
+  border-left: 0.35rem solid #2563eb;
+  border-radius: 0.35rem;
+  padding: 0.75rem 0.9rem;
+}
+.metric-card .value {
+  color: #0f172a;
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.metric-card .label {
+  color: #475569;
+  font-size: 0.72rem;
+  margin-top: 0.35rem;
+  text-transform: uppercase;
+}
+.flow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.55rem;
+  margin-top: 1.1rem;
+}
+.flow div {
+  background: #f8fafc;
+  border: 1px solid #dbe3ef;
+  border-radius: 0.35rem;
+  color: #0f172a;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.85rem 0.45rem;
+  text-align: center;
+}
+.small {
+  color: #475569;
+  font-size: 0.74rem;
+}
+</style>
 
-- Empresa ficticia de e-commerce de electrodomesticos.
-- Continuidad con el inventario del TP1.
-- Evaluacion basada en ISO/IEC 27002:2022.
-- Madurez calculada con escala CMMI.
+## Punto de partida
 
-## Diagnostico
+- El TP1 dejo inventario, clasificacion CID, procesos y responsables.
+- El TP2 transforma ese relevamiento en **diagnostico, tablero y plan de mejora**.
+- La pregunta central es: **donde esta expuesta TecnoHogar y que conviene hacer primero**.
 
-{{< include ../../../.build/tecnohogar/resumen_slides.md >}}
+::: {.notes}
+Abrir con la continuidad TP1 -> TP2. No presentar esto como un ejercicio aislado:
+el tablero nace del inventario y de la criticidad relevada antes.
+:::
 
-## Tablero
+## Alcance
 
-- Vista global de madurez por capitulo.
-- Top brechas por control.
-- Proyectos priorizados por brecha asociada y aporte de seguridad.
-- Descarga de metricas para trazabilidad.
+:::: {.columns}
+::: {.column width="52%"}
+**Estandar elegido**
+
+- ISO/IEC 27002:2022.
+- Evaluacion completa de controles.
+- Escala de madurez CMMI 0..5.
+- Caso principal: TecnoHogar S.A.
+:::
+
+::: {.column width="48%"}
+| Capitulo | Controles |
+| --- | ---: |
+| 5 - Organizativos | 37 |
+| 6 - Personas | 8 |
+| 7 - Fisicos | 14 |
+| 8 - Tecnologicos | 34 |
+| **Total** | **93** |
+:::
+::::
+
+::: {.notes}
+Remarcar que no elegimos solo 4 metricas: tomamos los cuatro capitulos
+evaluables y los 93 controles trabajados en la materia.
+:::
+
+## Metodo de medicion
+
+<div class="flow">
+  <div>Control ISO</div>
+  <div>Evidencia</div>
+  <div>Nivel CMMI</div>
+  <div>Brecha</div>
+  <div>Proyecto</div>
+</div>
+
+- **Madurez**: valor normalizado del nivel CMMI.
+- **Brecha**: `1 - madurez`.
+- **Brecha ponderada**: `brecha * peso del control`.
+- **Prioridad**: brecha asociada + aporte esperado del proyecto.
+
+::: {.notes}
+Esta es la defensa metodologica. Si preguntan "de donde sale el numero", la
+respuesta es: control ISO, evidencia, nivel CMMI y peso.
+:::
+
+## Fuentes de datos
+
+:::: {.columns}
+::: {.column width="33%"}
+**Observado**
+
+- Inventario TP1.
+- Clasificacion CID.
+- Roles y custodios.
+- Material de catedra.
+:::
+
+::: {.column width="33%"}
+**Definido**
+
+- Nivel CMMI.
+- Hallazgos.
+- Plan de proyectos.
+- Vinculos control-proyecto.
+:::
+
+::: {.column width="33%"}
+**Derivado**
+
+- Madurez global.
+- Brecha ponderada.
+- Quick wins.
+- Trazabilidad.
+:::
+::::
+
+::: {.notes}
+Importante: separar lo que sale del TP1 de lo que definimos como grupo. Eso hace
+defendible el tablero y evita que parezca una planilla con numeros arbitrarios.
+:::
+
+## Resultado ejecutivo
+
+<div class="metric-grid">
+  <div class="metric-card"><div class="value">38.4%</div><div class="label">Madurez global</div></div>
+  <div class="metric-card"><div class="value">61.6%</div><div class="label">Brecha global</div></div>
+  <div class="metric-card"><div class="value">93</div><div class="label">Controles evaluados</div></div>
+  <div class="metric-card"><div class="value">11</div><div class="label">Proyectos</div></div>
+  <div class="metric-card"><div class="value">3</div><div class="label">Quick wins</div></div>
+  <div class="metric-card"><div class="value">604</div><div class="label">Jornadas estimadas</div></div>
+</div>
+
+- El diagnostico muestra una organizacion con practicas existentes, pero sin SGSI medido.
+- La brecha no se concentra en un unico tema: combina personas, fisico, eventos y tecnologia.
+
+::: {.notes}
+No leer todos los numeros. Usar 38.4/61.6 como mensaje principal: hay base
+operativa, pero falta formalizacion, medicion y continuidad.
+:::
+
+## Lectura por capitulos
+
+| Capitulo | Controles | Madurez | Brecha |
+| --- | ---: | ---: | ---: |
+| 8 - Controles Tecnologicos | 34 | 36.5% | 63.5% |
+| 6 - Controles de Personas | 8 | 37.5% | 62.5% |
+| 7 - Controles Fisicos | 14 | 39.3% | 60.7% |
+| 5 - Controles Organizativos | 37 | 40.4% | 59.6% |
+
+- El capitulo mas debil es **8 - Controles Tecnologicos**.
+- Personas y seguridad fisica quedan muy cerca: el riesgo es transversal.
+
+::: {.notes}
+Evitar decir "todo esta mal". La lectura correcta es que hay madurez media-baja y
+una brecha distribuida. Eso justifica un plan por etapas.
+:::
+
+## Mapa ISO
+
+- En el tablero, cada cuadrado representa **un control ISO**.
+- Los 93 controles se agrupan por capitulo.
+- El color permite ver madurez y concentracion de brechas.
+- El hover permite justificar cada control con evidencia, entrevistado y hallazgo.
+
+**Demo:** abrir `Mapa ISO` y mostrar la superficie de controles.
+
+::: {.notes}
+Mostrar el treemap. Frase clave: "no es un grafico decorativo; es el universo
+completo de controles evaluados".
+:::
+
+## Brechas principales
+
+| Control | Brecha | Lectura |
+| --- | ---: | --- |
+| 6.1 Screening | 85.0% | Falta formalizar verificaciones de ingreso |
+| 6.3 Concientizacion | 85.0% | No hay programa anual medido |
+| 6.5 Desvinculacion | 85.0% | Riesgo en bajas y cambios de rol |
+| 6.7 Trabajo remoto | 85.0% | Politicas y controles incompletos |
+| 7.4 Monitoreo fisico | 85.0% | Cobertura desigual entre sedes |
+
+- El Pareto permite explicar por que el plan no intenta resolver todo al mismo tiempo.
+
+::: {.notes}
+Conectar brechas de personas y fisico con riesgo real: accesos indebidos,
+continuidad operativa, evidencia insuficiente y exposicion del e-commerce.
+:::
+
+## Perfil de seguridad
+
+| Capacidad operacional | Madurez |
+| --- | ---: |
+| Amenazas y vulnerabilidades | 5.0% |
+| Garantizar SI | 15.0% |
+| Proveedores | 24.0% |
+| Eventos de SI | 31.8% |
+| Seguridad de RRHH | 33.0% |
+
+- La capacidad mas debil es **Amenazas y vulnerabilidades**.
+- Para un e-commerce, esto impacta directamente en aplicaciones, redes, APIs y continuidad.
+
+::: {.notes}
+Esta slide sirve para mostrar que usamos mas de una vista. No solo capitulos ISO:
+tambien capacidades operacionales para tomar decisiones.
+:::
+
+## Plan de mejora
+
+| Proyecto | Plazo | Jornadas | Motivo |
+| --- | --- | ---: | --- |
+| PR-10 Concientizacion y ciclo de vida RRHH | Corto | 36 | Quick win |
+| PR-07 Seguridad fisica de oficinas y centros | Medio | 42 | Quick win |
+| PR-05 Incidentes, SIEM, logs y evidencia | Corto | 54 | Quick win |
+| PR-01 Gobierno SGSI, politicas y RACI | Corto | 58 | Estrategico |
+| PR-09 SDLC seguro, WAF, APIs y pruebas | Medio | 76 | Estrategico |
+
+- La cartera total tiene **11 proyectos**.
+- Se prioriza por brecha asociada, esfuerzo y aporte a seguridad.
+
+::: {.notes}
+Marcar que "quick win" no significa menor importancia: significa impacto alto con
+esfuerzo relativo bajo frente al resto de la cartera.
+:::
+
+## Demo del tablero
+
+Ruta recomendada para la defensa:
+
+1. **Ejecutivo**: madurez, brecha y quick wins.
+2. **Mapa ISO**: 93 controles y distribucion CMMI.
+3. **Brechas**: Pareto y concentracion de riesgo.
+4. **Plan**: proyectos, esfuerzo y roadmap.
+5. **Trazabilidad**: control -> proyecto -> evidencia.
+
+::: {.notes}
+La demo debe durar 3 a 4 minutos. No navegar libremente. Si hay poco tiempo,
+mostrar Ejecutivo, Mapa ISO, Plan y Trazabilidad.
+:::
+
+## Diferenciales frente al ejemplo
+
+- No depende de completar celdas manualmente en Excel.
+- Evalua los **93 controles** de ISO/IEC 27002:2022.
+- Datos versionados y documentados.
+- Validacion automatica en CI.
+- Tablero interactivo desplegable.
+- Informe y presentacion generables desde el repo.
+- Trazabilidad entre evidencia, brecha y proyecto.
+
+::: {.notes}
+No criticar el ejemplo. Presentarlo como referencia y explicar que nuestro
+diferencial es la reproducibilidad y la trazabilidad.
+:::
 
 ## Cierre
 
-La siguiente etapa es reemplazar datos de juguete por diagnostico final, evidencias, pesos revisados y plan de mejora defendible.
+**Decision recomendada:** usar el tablero como instrumento de gobierno, no solo como entrega academica.
+
+- Aprobar quick wins para reducir brechas visibles.
+- Formalizar gobierno SGSI y responsables.
+- Repetir medicion periodicamente con evidencia real.
+- Usar trazabilidad para justificar presupuesto y seguimiento.
+
+::: {.notes}
+Cerrar con una frase de gestion: el tablero resume 93 metricas en decisiones
+concretas. Ese es el punto central de la materia.
+:::

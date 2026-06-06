@@ -12,11 +12,11 @@ execute:
 
 # Objetivo
 
-Este informe presenta una primera version reproducible del diagnostico de seguridad de TecnoHogar S.A. La evaluacion usa una seleccion de controles ISO/IEC 27002:2022 y una escala de madurez CMMI.
+Este informe presenta el diagnostico reproducible de seguridad de TecnoHogar S.A. La evaluacion usa los 93 controles ISO/IEC 27002:2022 trabajados por la catedra y una escala de madurez CMMI.
 
 # Alcance
 
-El alcance inicial cubre controles organizativos, de personas, fisicos y tecnologicos. La empresa evaluada es ficticia y deriva del inventario realizado en el TP1.
+El alcance cubre controles organizativos, de personas, fisicos y tecnologicos. La empresa evaluada es ficticia y deriva del inventario, dependencias, roles y clasificacion CID realizados en el TP1.
 
 # Resultados
 
@@ -37,4 +37,4 @@ El porcentaje global pondera cada control por su peso relativo y calcula la brec
 
 # Proximos pasos
 
-Esta version debe reemplazar los datos de juguete por evidencias mas completas, ajustar pesos, priorizar controles relevantes para e-commerce y completar la narrativa del plan de seguridad.
+El plan de trabajo prioriza formalizar gobierno SGSI, accesos, proveedores, incidentes, continuidad, seguridad fisica, hardening y SDLC seguro. Cada iniciativa se vincula con controles ISO concretos para sostener la defensa del tablero.

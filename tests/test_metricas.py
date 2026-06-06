@@ -33,9 +33,19 @@ def test_ejemplo_genera_dimensiones_del_tablero():
 
 def test_madurez_global_esta_en_rango():
     result = compute_metrics(load_dataset("tecnohogar"))
-    assert 0 <= result.resumen["madurez_global"] <= 1
+    assert 0.38 <= result.resumen["madurez_global"] <= 0.45
     assert 0 <= result.resumen["brecha_global"] <= 1
-    assert 0 < result.resumen["controles_evaluados"] <= 93
+    assert result.resumen["controles_evaluados"] == 93
+
+
+def test_tecnohogar_cubre_tp1_y_fuentes():
+    dataset = load_dataset("tecnohogar")
+    assert len(dataset["activos"]) == 41
+    assert len(dataset["entrevistas"]) == 6
+
+    info_assets = dataset["activos"][dataset["activos"]["tipo"] == "Informacion"]
+    assert len(info_assets) == 13
+    assert info_assets["criticidad_cid"].between(1, 5).all()
 
 
 def test_control_mas_critico_tiene_brecha():
@@ -48,3 +58,11 @@ def test_proyectos_tienen_prioridad_calculada():
     result = compute_metrics(load_dataset("tecnohogar"))
     assert "prioridad" in result.proyectos.columns
     assert result.proyectos["prioridad"].max() > 0
+
+
+def test_controles_debiles_tienen_proyecto():
+    dataset = load_dataset("tecnohogar")
+    weak_controls = set(dataset["diagnostico"].loc[dataset["diagnostico"]["nivel_madurez"] <= 2, "control_id"])
+    linked_controls = set(dataset["proyecto_control"]["control_id"])
+
+    assert weak_controls <= linked_controls
