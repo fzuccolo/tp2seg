@@ -38,14 +38,29 @@ def test_madurez_global_esta_en_rango():
     assert result.resumen["controles_evaluados"] == 93
 
 
-def test_tecnohogar_cubre_tp1_y_fuentes():
+def test_tecnohogar_cubre_activos_y_referentes():
     dataset = load_dataset("tecnohogar")
     assert len(dataset["activos"]) == 41
     assert len(dataset["entrevistas"]) == 6
 
     info_assets = dataset["activos"][dataset["activos"]["tipo"] == "Informacion"]
     assert len(info_assets) == 13
-    assert info_assets["criticidad_cid"].between(1, 5).all()
+    assert info_assets["criticidad_cid"].between(1, 4).all()
+
+
+def test_tecnohogar_tiene_cid_y_fuentes_genericas():
+    dataset = load_dataset("tecnohogar")
+    activos = dataset["activos"]
+    diagnostico = dataset["diagnostico"]
+
+    assert "nivel_jerarquia" in activos.columns
+    assert "fuente" in diagnostico.columns
+    assert diagnostico["fuente"].fillna("").astype(str).str.strip().ne("").all()
+
+    info_assets = activos[activos["tipo"] == "Informacion"]
+    for _, row in info_assets.iterrows():
+        values = [int(row[column]) for column in ["confidencialidad", "integridad", "disponibilidad"]]
+        assert int(row["criticidad_cid"]) == max(values)
 
 
 def test_control_mas_critico_tiene_brecha():

@@ -62,7 +62,7 @@ def render_report_summary(result: MetricResult) -> str:
     return "\n\n".join(
         [
             "## Resumen generado",
-            f"Empresa evaluada: **{resumen['empresa_nombre']}**.",
+            f"Caso evaluado: **{resumen['empresa_nombre']}**.",
             f"Estandar usado: **{resumen['estandar_id']}**.",
             f"Madurez global: **{resumen['madurez_global_pct']}%**.",
             f"Brecha global: **{resumen['brecha_global_pct']}%**.",

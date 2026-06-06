@@ -30,6 +30,13 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Compute build timestamp
+        id: meta
+        run: |
+          timestamp="$(date -u +'%Y%m%d-%H%M%S')"
+          echo "timestamp=${timestamp}" >> "$GITHUB_OUTPUT"
+          echo "BUILD_TIMESTAMP=${timestamp}" >> "$GITHUB_ENV"
+
       - name: Validate data
         run: make validate
 
@@ -39,43 +46,42 @@ jobs:
       - name: Build deliverables
         run: make build
 
-      - name: Upload presentation
+      - name: Upload downloadable deliverables
         uses: actions/upload-artifact@v4
         with:
-          name: tp2-tecnohogar-presentacion
-          path: .build/tecnohogar/slides/
+          name: tp2-tecnohogar-entregables
+          path: .build/entregables/
           if-no-files-found: error
           retention-days: 90
 
-      - name: Upload executive report
-        uses: actions/upload-artifact@v4
-        with:
-          name: tp2-tecnohogar-informe-ejecutivo
-          path: .build/tecnohogar/informe/
-          if-no-files-found: error
-          retention-days: 90
-
-      - name: Upload generated deliverables
-        uses: actions/upload-artifact@v4
-        with:
-          name: tp2-build-completo
-          path: .build/
-          include-hidden-files: true
-          if-no-files-found: error
-          retention-days: 30
+      - name: Publish release downloads
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: entregables-${{ steps.meta.outputs.timestamp }}
+        run: |
+          gh release create "$RELEASE_TAG" \
+            .build/entregables/tp2-tecnohogar-presentacion.pptx \
+            .build/entregables/tp2-tecnohogar-informe.pdf \
+            .build/entregables/tp2-tecnohogar-entregables.zip \
+            --title "Entregables TP2 ${{ steps.meta.outputs.timestamp }}" \
+            --notes "Descargas generadas por CI: presentacion PPTX, informe PDF y ZIP completo." \
+            --latest
 
       - name: Publish artifact summary
         run: |
           {
             echo "## Entregables TP2"
             echo ""
-            echo "Descargar desde la seccion **Artifacts** de esta corrida:"
-            echo ""
-            echo "- **tp2-tecnohogar-presentacion**: presentacion HTML y PPTX lista para exponer."
-            echo "- **tp2-tecnohogar-informe-ejecutivo**: informe ejecutivo HTML."
-            echo "- **tp2-build-completo**: metricas, CSV, informe, slides y salidas completas."
-            echo ""
-            echo "Corrida: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            if [ "${GITHUB_EVENT_NAME}" = "push" ] && [ "${GITHUB_REF}" = "refs/heads/main" ]; then
+              echo "Descarga permanente desde la ultima Release:"
+              echo ""
+              echo "- PPTX: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/latest/download/tp2-tecnohogar-presentacion.pptx"
+              echo "- PDF: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/latest/download/tp2-tecnohogar-informe.pdf"
+              echo "- ZIP: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/latest/download/tp2-tecnohogar-entregables.zip"
+              echo ""
+            fi
+            echo "Artifact temporal de esta corrida: **tp2-tecnohogar-entregables**."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Update deploy branch

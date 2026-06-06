@@ -14,7 +14,7 @@ import plotly.graph_objects as go
 import streamlit as st
 from plotly.subplots import make_subplots
 
-from app.datos import list_companies, load_dataset, repo_root
+from app.datos import list_cases, load_dataset, repo_root
 from app.metricas import compute_metrics
 
 
@@ -432,9 +432,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-companies = list_companies(ROOT)
-default_idx = companies.index(DEFAULT_COMPANY) if DEFAULT_COMPANY in companies else 0
-selected = st.sidebar.selectbox("Empresa", companies, index=default_idx)
+cases = list_cases(ROOT)
+default_idx = cases.index(DEFAULT_COMPANY) if DEFAULT_COMPANY in cases else 0
+selected = st.sidebar.selectbox("Caso", cases, index=default_idx)
 result = get_result(selected, DASHBOARD_CACHE_VERSION)
 resumen = result.resumen
 controles = result.controles.copy()
@@ -780,17 +780,17 @@ with tab_trazabilidad:
     with t1:
         section_title("Entrevistas")
         if result.entrevistas.empty:
-            st.info("No hay entrevistas registradas para esta empresa.")
+            st.info("No hay entrevistas registradas para este caso.")
         else:
             st.dataframe(result.entrevistas, width="stretch", hide_index=True)
     with t2:
         section_title("Fuentes")
         source_rows = [
             {"archivo": "datos/estandares/iso27002_2022/catalogo_controles.csv", "contenido": "Catalogo ISO 27002:2022 y atributos de control"},
-            {"archivo": f"datos/empresas/{selected}/diagnostico.csv", "contenido": "Evaluacion de madurez por control"},
-            {"archivo": f"datos/empresas/{selected}/proyectos.csv", "contenido": "Plan de mejora y esfuerzo estimado"},
-            {"archivo": f"datos/empresas/{selected}/proyecto_control.csv", "contenido": "Relacion control-proyecto"},
-            {"archivo": f"datos/empresas/{selected}/entrevistas.csv", "contenido": "Entrevistados, cuando existe"},
+            {"archivo": f"datos/casos/{selected}/diagnostico.csv", "contenido": "Evaluacion de madurez por control"},
+            {"archivo": f"datos/casos/{selected}/proyectos.csv", "contenido": "Plan de mejora y esfuerzo estimado"},
+            {"archivo": f"datos/casos/{selected}/proyecto_control.csv", "contenido": "Relacion control-proyecto"},
+            {"archivo": f"datos/casos/{selected}/entrevistas.csv", "contenido": "Entrevistados, cuando existe"},
         ]
         st.dataframe(pd.DataFrame(source_rows), width="stretch", hide_index=True)
 

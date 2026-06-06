@@ -134,7 +134,7 @@ respuesta es: control ISO, evidencia, nivel CMMI y peso.
 - Inventario TP1.
 - Clasificacion CID.
 - Roles y custodios.
-- Material de catedra.
+- Evidencia definida en CSV.
 :::
 
 ::: {.column width="33%"}
@@ -281,7 +281,7 @@ mostrar Ejecutivo, Mapa ISO, Plan y Trazabilidad.
 
 ## Diferenciales frente al ejemplo
 
-- No depende de completar celdas manualmente en Excel.
+- No depende de completar planillas manualmente.
 - Evalua los **93 controles** de ISO/IEC 27002:2022.
 - Datos versionados y documentados.
 - Validacion automatica en CI.

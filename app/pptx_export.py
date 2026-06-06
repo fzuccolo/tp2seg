@@ -314,7 +314,7 @@ def _slide_scope(prs: Presentation, result: MetricResult) -> None:
     _paragraph_box(
         slide,
         [
-            "Observado: TP1, roles, activos y material de catedra.",
+            "Observado: TP1, roles y activos definidos en CSV.",
             "Definido: niveles CMMI, hallazgos, proyectos y vinculos.",
             "Derivado: madurez, brecha, quick wins y prioridades.",
         ],

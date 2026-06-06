@@ -1,53 +1,14 @@
 # Datos
 
-Esta carpeta contiene las fuentes versionadas del tablero, el informe y la
-presentacion. La regla del proyecto es que las salidas se puedan regenerar desde
-CSV/YAML y scripts, sin completar celdas manualmente en Excel.
+Esta carpeta contiene las fuentes del tablero, del informe y de la presentacion. Primero definimos el estandar comun, despues definimos un caso concreto, y finalmente el motor calcula metricas, graficos y entregables.
 
-El objetivo no es solo "tener numeros": cada dato debe poder explicarse. Para
-eso se separan tres tipos de informacion:
+El objetivo es evitar cargar celdas a mano. Los CSV/YAML son la fuente visible del trabajo y los scripts explican como se generan o actualizan.
 
-- Datos observados: salen del TP1, de entrevistas, de inventarios o de material
-  provisto por la catedra.
-- Datos derivados: se calculan automaticamente desde otros datos versionados.
-- Datos definidos por el grupo: son criterios de evaluacion, priorizacion o
-  estimacion. Tienen que quedar explicitados en el script generador, en el
-  README de la empresa o en el informe.
+## 1. Estandar
 
-## Estructura
+Solo usamos `iso27002_2022`. Es el catalogo de controles contra el que se evalua cualquier caso.
 
-```text
-datos/
-  estandares/
-    iso27002_2022/
-      catalogo_controles.csv
-      parametros_madurez.csv
-  empresas/
-    ejemplo/
-      empresa.yml
-      activos.csv
-      entrevistas.csv
-      diagnostico.csv
-      proyectos.csv
-      proyecto_control.csv
-    tecnohogar/
-      empresa.yml
-      activos.csv
-      entrevistas.csv
-      diagnostico.csv
-      proyectos.csv
-      proyecto_control.csv
-```
-
-Cada empresa vive en su propia carpeta. Eso permite desplegar el mismo tablero
-con distintos datasets sin mezclar evidencia, supuestos ni entregables.
-
-## Capa 1: estandar comun
-
-`datos/estandares/iso27002_2022/catalogo_controles.csv` es el catalogo comun de
-controles ISO/IEC 27002:2022 usado por todas las empresas.
-
-Contiene los 93 controles de los capitulos evaluables:
+`catalogo_controles.csv` contiene los 93 controles de ISO/IEC 27002:2022 que se trabajan en la materia:
 
 | Capitulo | Controles |
 | --- | ---: |
@@ -56,156 +17,118 @@ Contiene los 93 controles de los capitulos evaluables:
 | 7 - Controles Fisicos | 14 |
 | 8 - Controles Tecnologicos | 34 |
 
-El catalogo incluye:
+Para cada control se guarda lo necesario para calcular y graficar:
 
-- Identificacion del control: `control_id`, `capitulo`, `control_nombre`.
-- Pregunta/proposito usados para evaluar el control.
-- Peso relativo del control dentro del tablero: `peso`.
-- Tipo de control: preventivo, detectivo, correctivo.
-- Propiedades CID: confidencialidad, integridad, disponibilidad.
-- Funciones de ciberseguridad: identificacion, proteccion, deteccion, respuesta
-  y recuperacion.
-- Capacidades operacionales y dominios de seguridad usados para agrupar
-  graficos.
-- Proyecto/plazo sugerido desde el material de referencia.
+- `control_id`, `capitulo`, `control_nombre`: identifican el control.
+- `pregunta` y `proposito`: ayudan a entender que se evalua.
+- `peso`: importancia relativa para calcular brecha ponderada.
+- columnas de tipo de control: preventivo, detectivo, correctivo.
+- columnas CID: confidencialidad, integridad, disponibilidad.
+- columnas de funcion: identificacion, proteccion, deteccion, respuesta, recuperacion.
+- capacidades y dominios: se usan para graficos de perfil y mapa ISO.
+- proyecto/plazo sugerido: referencia para armar el plan de mejora.
 
-Fuente: se importa desde el ejemplo de la catedra
-`REF G1 - Metricas_ISO_27002_2022_Grupo2_FINAL.xlsx`. No se descarga ni copia la
-norma oficial ISO completa; el repo trabaja con el material academico disponible
-para el TP.
+El repositorio usa `catalogo_controles.csv` como version operativa del estandar para el TP. No incluye la norma ISO completa; solo el catalogo necesario para evaluar, calcular metricas y presentar resultados.
 
-`parametros_madurez.csv` define la escala CMMI usada para transformar niveles
-0..5 en valores numericos:
+`parametros_madurez.csv` define como se traduce la madurez CMMI a numero:
 
-| Nivel | Nombre | Valor |
+| Nivel | Lectura simple | Valor |
 | ---: | --- | ---: |
-| 0 | Inexistente | 0.00 |
-| 1 | Inicial | 0.05 |
-| 2 | Gestionado | 0.15 |
-| 3 | Definido | 0.60 |
-| 4 | Cuantitativo | 0.85 |
-| 5 | Optimizado | 1.00 |
+| 0 | No existe evidencia | 0.00 |
+| 1 | Practica inicial o reactiva | 0.05 |
+| 2 | Gestion parcial | 0.15 |
+| 3 | Definido/documentado | 0.60 |
+| 4 | Medido con indicadores | 0.85 |
+| 5 | Optimizado/mejora continua | 1.00 |
 
-## Capa 2: metadata de empresa
+Ese valor es el que usa el tablero para calcular madurez, brecha y prioridades.
 
-Cada empresa tiene un `empresa.yml` con datos de contexto:
+## 2. Caso
 
-- Nombre de la empresa/caso.
-- Estandar usado.
-- Descripcion del alcance.
-- Metadata que aparece en tablero, informe y slides.
+Un caso es una organizacion, escenario o dataset evaluable. Puede ser una empresa real, una empresa ficticia, un organismo, una unidad de negocio o un caso de practica.
 
-Este archivo no calcula metricas, pero fija el contexto. Si cambia el alcance,
-tambien debe revisarse el diagnostico porque no todos los controles se
-interpretan igual para todas las organizaciones.
+Cada caso vive en `datos/casos/<caso_id>/`.
 
-## Capa 3: activos
+`caso.yml` define el contexto minimo:
 
-`activos.csv` representa el alcance operativo sobre el que se evalua seguridad.
-Para TecnoHogar se genera desde el Excel del TP1:
+- `id`: identificador usado por scripts y tablero.
+- `nombre`: nombre visible en tablero, informe y slides.
+- `descripcion`: alcance resumido.
+- `industria`: contexto del caso.
+- `estandar`: para este TP debe ser `iso27002_2022`.
 
-```text
-Entregas/TP1/TP1_Inventario_TecnoHogar_v2.xlsx
-```
+Este archivo no calcula nada. Sirve para dejar claro que se esta evaluando.
 
-Datos observados desde TP1:
+## 3. Activos
 
-- `activo_id`
-- `tipo`
-- `nombre`
-- `capa`
-- `nivel_evo`
-- `detalle`
-- `descripcion`
-- `propietario`
-- `custodio`
-- `area`
-- `padre_principal`
-- `origen`
-- valores CID para activos de informacion cuando estan relevados
-- justificacion CID y marco aplicable
+`activos.csv` define sobre que realidad operativa se interpreta la seguridad. Sin activos, el diagnostico ISO queda demasiado abstracto.
 
-Datos derivados:
+Campos principales:
 
-- `criticidad_cid`: para activos de informacion sale del TP1; para procesos,
-  aplicaciones y servidores se hereda desde activos relacionados.
-- `proceso`: se infiere recorriendo relaciones padre/hijo hasta el proceso de
-  negocio principal.
+- `activo_id`: codigo estable del activo.
+- `tipo`: proceso, informacion, aplicacion, servidor u otra categoria.
+- `nombre`: nombre visible.
+- `criticidad_cid`: criticidad usada por el tablero.
+- `propietario`, `custodio`, `area`: responsables.
+- `proceso`: proceso de negocio asociado.
+- `confidencialidad`, `integridad`, `disponibilidad`: valores CID cuando aplican.
 
-Datos definidos por el grupo:
+Uso en el tablero:
 
-- No deberia haber datos definidos manualmente dentro de `activos.csv` salvo que
-  se agregue una fuente nueva de relevamiento. Si se modifica un activo, lo
-  correcto es ajustar el TP1 fuente o documentar la excepcion en el README de la
-  empresa.
+- da contexto a la postura de seguridad;
+- permite explicar por que ciertos controles importan mas;
+- ayuda a justificar proyectos y prioridades.
 
-## Capa 4: entrevistas
+## 4. Entrevistas
 
-`entrevistas.csv` registra las personas usadas como fuente de evidencia.
+`entrevistas.csv` registra las fuentes humanas o roles usados para justificar la evidencia.
 
-Datos observados:
-
-- Nombres, areas y responsabilidades salen del caso TP1 o de la narrativa del
-  relevamiento.
-
-Datos definidos por el grupo:
+Campos principales:
 
 - `entrevista_id`
-- fecha de corte del relevamiento
-- asignacion de cada responsable como fuente principal para un conjunto de
-  controles
+- `nombre`
+- `area`
+- `empresa`
+- `cargo`
+- `fecha`
+- `fuente`
 
-Este archivo no pretende simular entrevistas completas. Su funcion es hacer
-trazable de donde sale la evidencia usada en `diagnostico.csv`.
+No intenta ser una transcripcion. Su funcion es que cada evidencia tenga una fuente defendible.
 
-## Capa 5: diagnostico ISO
+## 5. Diagnostico
 
-`diagnostico.csv` es el archivo central del TP2. Debe tener una fila por control
-ISO aplicable. Para TecnoHogar son 93 filas.
+`diagnostico.csv` es el archivo central. Tiene una fila por control ISO evaluado. Para este TP deben ser 93 filas por caso.
 
-Datos que vienen del catalogo comun:
+Campos principales:
 
-- `control_id`
-- capitulo, nombre, pregunta, peso y atributos del control se agregan en runtime
-  al unir `diagnostico.csv` con `catalogo_controles.csv`.
+- `control_id`: se cruza con `catalogo_controles.csv`.
+- `nivel_madurez`: nivel CMMI 0..5 asignado por el grupo.
+- `valor`: valor numerico normalizado del nivel.
+- `evidencia`: que se observo.
+- `hallazgo`: lectura ejecutiva del problema o estado.
+- `observaciones`: que falta mejorar.
+- `entrevistado`: referente o rol asociado a la evidencia.
+- `fuente`: referencia corta del origen o contexto de la evidencia cuando aplica.
+- `fecha`: fecha de corte.
+- `objetivo_negocio`: para explicar por que importa.
+- `interpretacion`: texto de apoyo para defender el grafico.
 
-Datos definidos por evaluacion del grupo:
+Regla practica para asignar niveles:
 
-- `nivel_madurez`: nivel CMMI 0..5 asignado al estado actual del control.
-- `evidencia`: razon concreta que justifica el nivel.
-- `hallazgo`: lectura ejecutiva de la situacion del control.
-- `observaciones`: que falta o que deberia fortalecerse.
-- `entrevistado`: fuente principal de la evidencia.
-- `fecha`: fecha de corte del diagnostico.
-- `objetivo_negocio`: objetivo que ayuda a interpretar el control en el caso.
-- `interpretacion`: lectura sugerida para explicar el grafico.
+- 0: no hay evidencia.
+- 1: existe algo informal o reactivo.
+- 2: hay gestion parcial, pero incompleta.
+- 3: esta definido y documentado.
+- 4: se mide con indicadores o revision periodica.
+- 5: se mejora sistematicamente.
 
-Datos derivados:
+Para defender un numero hay que poder responder: que vimos, que falta, quien lo informo y por que ese nivel es razonable.
 
-- `valor`: valor numerico normalizado de la escala CMMI. El tablero usa este
-  campo para calcular madurez y brecha.
-- `madurez_desc` y `aspecto_clave`: descripcion legible del nivel.
-- `cumplimiento`: se mantiene por compatibilidad con el ejemplo de catedra; la
-  madurez efectiva del tablero sale de `valor`.
+## 6. Proyectos
 
-Regla de evaluacion:
+`proyectos.csv` convierte brechas en acciones.
 
-- Nivel 0: no hay evidencia de implementacion.
-- Nivel 1: existe una practica reactiva, informal o dependiente de personas.
-- Nivel 2: hay gestion parcial, pero falta formalizacion, cobertura o evidencia.
-- Nivel 3: el control esta definido/documentado para el alcance principal.
-- Nivel 4: el control se mide con indicadores o revisiones periodicas.
-- Nivel 5: hay mejora continua demostrable.
-
-Para defender el numero, no alcanza con decir "cumple" o "no cumple". Cada fila
-debe poder contestar: que vimos, que falta, quien lo informo y por que ese nivel
-es razonable.
-
-## Capa 6: proyectos
-
-`proyectos.csv` traduce las brechas en una cartera de iniciativas.
-
-Datos definidos por el grupo:
+Campos principales:
 
 - `proyecto_id`
 - `titulo`
@@ -216,161 +139,47 @@ Datos definidos por el grupo:
 - `dependencias`
 - `tipo_seguridad`
 
-Datos derivados:
+Algunos valores son decisiones del grupo. Por ejemplo, esfuerzo, plazo y aporte de seguridad no salen automaticamente de los activos: se estiman segun brecha, impacto, criticidad y dependencia entre iniciativas.
 
-- `controles_esperados`: cantidad de controles vinculados al proyecto.
-- columnas `logica`, `fisica`, `organizativa`, `legal`: clasificacion del
-  proyecto para graficos.
-- `costo`: estimacion calculada como `esfuerzo_jornadas * 150000`.
-- `meses`: duracion aproximada calculada como `esfuerzo_jornadas / 22`.
+Uso en el tablero:
 
-Los proyectos no salen literalmente del TP1. Son una decision profesional del
-grupo basada en:
-
-- brechas ISO detectadas;
-- criticidad de activos y procesos del TP1;
-- material de la catedra sobre tablero, KPI/KGI y plan de acciones;
-- ejemplo G1 como referencia de estructura.
-
-## Capa 7: trazabilidad proyecto-control
-
-`proyecto_control.csv` vincula cada proyecto con los controles ISO que ayuda a
-mejorar.
-
-Datos definidos por el grupo:
-
-- relacion `proyecto_id` -> `control_id`.
-
-Datos derivados en el tablero:
-
-- prioridad por proyecto;
-- brecha asociada;
-- esfuerzo acumulado;
+- priorizacion esfuerzo/impacto;
+- roadmap;
 - quick wins;
-- graficos de trazabilidad capitulo -> control -> proyecto.
+- costo y esfuerzo acumulado.
 
-Esta relacion es clave para defender el plan. Si un proyecto no esta conectado a
-controles con brecha, queda debil. Si un control critico no tiene proyecto
-asociado, queda una brecha sin tratamiento.
+## 7. Relacion proyecto-control
 
-## Flujo incremental de generacion
+`proyecto_control.csv` une proyectos con controles ISO.
 
-### 1. Importar base academica y caso ejemplo
+Campos:
 
-```bash
-make import-example
-```
+- `proyecto_id`
+- `control_id`
 
-Este paso importa:
+Esta relacion es clave. Si un control debil no tiene proyecto asociado, el plan queda incompleto. Si un proyecto no mejora controles con brecha, queda dificil de justificar.
 
-- catalogo ISO usado por el tablero;
-- parametros comunes;
-- dataset `empresas/ejemplo` desde el trabajo G1.
+## 8. Caso: TecnoHogar
 
-Sirve para tener una referencia funcional y comparar si TecnoHogar queda
-razonable frente a un caso ya armado.
+TecnoHogar es el caso principal del TP2 y esta basado en el TP1.
 
-### 2. Generar dataset TecnoHogar desde TP1
+La informacion del caso esta definida en los CSV de `datos/casos/tecnohogar/`. Para otros casos, esos CSV podrian salir de otra fuente o cargarse manualmente. Lo importante es que el tablero consume siempre la misma estructura.
 
-```bash
-make generate-tecnohogar
-```
+`activos.csv` contiene el inventario operativo del caso: procesos, activos de informacion, aplicaciones, servidores, responsables, criticidad y valores CID cuando aplican.
 
-Por defecto toma:
+`entrevistas.csv` contiene los roles usados como fuente de evidencia para el diagnostico.
 
-```text
-../../udemm_sistemas/seguridad_informatica/Entregas/TP1/TP1_Inventario_TecnoHogar_v2.xlsx
-```
+`diagnostico.csv` contiene la evaluacion de los 93 controles ISO: nivel de madurez, evidencia, hallazgo, observaciones, fuente y lectura de negocio.
 
-Si el Excel esta en otra ruta:
+`proyectos.csv` contiene la cartera de mejora propuesta para cerrar brechas: titulo, plazo, esfuerzo, aporte de seguridad, dependencias y tipo de seguridad.
 
-```bash
-TP1_TECNOHOGAR_XLSX=/ruta/TP1_Inventario_TecnoHogar_v2.xlsx make generate-tecnohogar
-```
+`proyecto_control.csv` conecta cada proyecto con los controles ISO que ayuda a mejorar.
 
-Este paso genera:
+## 9. Como leer los graficos
 
-- `datos/empresas/tecnohogar/activos.csv`
-- `datos/empresas/tecnohogar/entrevistas.csv`
-- `datos/empresas/tecnohogar/diagnostico.csv`
-- `datos/empresas/tecnohogar/proyectos.csv`
-- `datos/empresas/tecnohogar/proyecto_control.csv`
-
-El script combina datos observados del TP1 con criterios definidos en codigo:
-
-- niveles de madurez por control;
-- evidencias destacadas;
-- responsables entrevistados;
-- cartera de proyectos;
-- vinculos proyecto-control.
-
-### 3. Validar integridad
-
-```bash
-make validate
-```
-
-La validacion controla que:
-
-- existan los archivos requeridos;
-- los controles del diagnostico existan en el catalogo;
-- los niveles de madurez esten en rango;
-- los vinculos proyecto-control sean validos;
-- TecnoHogar tenga los 93 controles y los activos esperados;
-- las brechas debiles tengan hallazgo, observacion y proyecto asociado.
-
-### 4. Calcular tablero y salidas
-
-```bash
-make build
-```
-
-El motor de metricas calcula:
-
-- madurez global ponderada;
-- brecha global;
-- madurez por capitulo;
-- distribucion CMMI;
-- brechas ponderadas por control;
-- capacidades operacionales;
-- dominios de seguridad;
-- prioridad de proyectos;
-- quick wins;
-- trazabilidad.
-
-En CI se ejecuta:
-
-```bash
-make ci
-```
-
-que equivale a validar datos, correr tests y generar salidas.
-
-## Como se calculan los graficos principales
-
-- Madurez de control: `valor` del nivel CMMI.
-- Brecha de control: `1 - valor`.
-- Brecha ponderada: `brecha * peso`.
-- Madurez global: promedio ponderado de `valor` por `peso`.
-- Madurez por capitulo: promedio ponderado dentro de cada capitulo ISO.
-- Mapa ISO: distribucion de los 93 controles por capitulo y nivel CMMI.
-- Treemap de controles: superficie de controles coloreada por madurez.
-- Pareto de brechas: controles ordenados por `peso_brecha`.
-- Plan: proyectos priorizados por brecha asociada, aporte y esfuerzo.
-- Quick wins: proyectos de prioridad alta y esfuerzo relativo bajo.
-- Trazabilidad: union entre catalogo, diagnostico, proyectos y vinculos.
-
-## Criterio para agregar o cambiar datos
-
-1. Primero identificar la fuente: TP1, material de catedra, entrevista,
-   inferencia o criterio del grupo.
-2. Si el dato viene de una fuente estructurada, preferir un script generador.
-3. Si el dato es criterio del grupo, dejarlo explicito y consistente.
-4. Si cambia un nivel de madurez, actualizar tambien evidencia, hallazgo y
-   observaciones.
-5. Si cambia una brecha relevante, revisar el proyecto asociado.
-6. Ejecutar `make validate` antes de usar el tablero o generar entregables.
-
-La pregunta guia es: si el profesor senala un grafico, deberiamos poder llegar
-desde ese punto hasta el control ISO, la evidencia, el activo/proceso afectado y
-el proyecto propuesto.
+- Ejecutivo: resume madurez, brecha, control critico, capacidad debil y quick wins.
+- Mapa ISO: muestra los cuatro capitulos y la distribucion CMMI de los 93 controles.
+- Perfil: agrupa controles por funciones, dominios, CID, tipo y capacidades.
+- Brechas: ordena controles por brecha ponderada.
+- Plan: muestra proyectos, esfuerzo, prioridad y roadmap.
+- Trazabilidad: conecta capitulo, control, proyecto y evidencia.
