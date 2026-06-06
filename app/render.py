@@ -34,6 +34,11 @@ def write_outputs(result: MetricResult, output_dir: Path) -> None:
     result.ciberfunciones.to_csv(output_dir / "ciberfunciones.csv", index=False)
     result.proyectos_plazo.to_csv(output_dir / "proyectos_por_plazo.csv", index=False)
     result.proyectos_tipo.to_csv(output_dir / "proyectos_por_tipo.csv", index=False)
+    result.proyectos_capitulo.to_csv(output_dir / "proyectos_por_capitulo.csv", index=False)
+    result.proyectos_capacidad.to_csv(output_dir / "proyectos_por_capacidad.csv", index=False)
+    result.esfuerzo_roadmap.to_csv(output_dir / "esfuerzo_roadmap.csv", index=False)
+    result.quick_wins.to_csv(output_dir / "quick_wins.csv", index=False)
+    result.trazabilidad.to_csv(output_dir / "trazabilidad_control_proyecto.csv", index=False)
 
     with (output_dir / "resumen.json").open("w", encoding="utf-8") as fh:
         json.dump(result.resumen, fh, ensure_ascii=False, indent=2)
@@ -62,6 +67,8 @@ def render_report_summary(result: MetricResult) -> str:
             f"Madurez global: **{resumen['madurez_global_pct']}%**.",
             f"Brecha global: **{resumen['brecha_global_pct']}%**.",
             f"Controles evaluados: **{resumen['controles_evaluados']}**.",
+            f"Quick wins identificados: **{resumen['quick_wins']}**.",
+            f"Esfuerzo total estimado: **{resumen['esfuerzo_total']} jornadas**.",
             f"Capitulo mas debil: **{resumen['capitulo_mas_debil']}**.",
             f"Capacidad operacional mas debil: **{resumen['capacidad_mas_debil']}**.",
             "### Madurez por capitulo",
@@ -108,6 +115,8 @@ def render_slides_summary(result: MetricResult) -> str:
             f"- Madurez global: **{resumen['madurez_global_pct']}%**",
             f"- Brecha global: **{resumen['brecha_global_pct']}%**",
             f"- Controles evaluados: **{resumen['controles_evaluados']}**",
+            f"- Quick wins: **{resumen['quick_wins']}**",
+            f"- Esfuerzo total: **{resumen['esfuerzo_total']} jornadas**",
             f"- Capitulo mas debil: **{resumen['capitulo_mas_debil']}**",
             f"- Capacidad mas debil: **{resumen['capacidad_mas_debil']}**",
             "## Brechas principales",

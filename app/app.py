@@ -11,6 +11,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+from plotly.subplots import make_subplots
 
 from app.datos import list_companies, load_dataset, repo_root
 from app.metricas import compute_metrics
@@ -31,7 +32,27 @@ CHAPTER_ORDER = [
     "7 - Controles Físicos",
     "8 - Controles Tecnológicos",
 ]
-PALETTE = ["#2563eb", "#16a34a", "#f59e0b", "#dc2626", "#7c3aed", "#0891b2", "#be123c"]
+PALETTE = ["#2563eb", "#16a34a", "#f59e0b", "#dc2626", "#7c3aed", "#0891b2", "#be123c", "#475569"]
+CHAPTER_COLORS = {
+    "5 - Controles Organizativos": "#2563eb",
+    "6 - Controles de Personas": "#16a34a",
+    "7 - Controles Físicos": "#f59e0b",
+    "8 - Controles Tecnológicos": "#dc2626",
+}
+MATURITY_COLORS = {
+    "0 - Inexistente": "#991b1b",
+    "1 - Inicial": "#dc2626",
+    "2 - Gestionado": "#f97316",
+    "3 - Definido": "#f59e0b",
+    "4 - Cuantitativo": "#22c55e",
+    "5 - Optimizado": "#0f766e",
+}
+QUADRANT_COLORS = {
+    "Quick win": "#16a34a",
+    "Proyecto estrategico": "#2563eb",
+    "Mejora tactica": "#f59e0b",
+    "Diferir": "#64748b",
+}
 
 
 @st.cache_data
@@ -44,8 +65,13 @@ def pct(value: float | int) -> str:
     return f"{float(value):.1f}%"
 
 
-def short_chapter(value: str) -> str:
-    return value.replace("Controles ", "").replace("6 - ", "6 - ").replace("7 - ", "7 - ").replace("8 - ", "8 - ")
+def num(value: float | int) -> str:
+    return f"{float(value):,.0f}".replace(",", ".")
+
+
+def short_text(value: str, limit: int = 48) -> str:
+    text = str(value)
+    return text if len(text) <= limit else text[: limit - 1] + "…"
 
 
 def ordered_chapters(df: pd.DataFrame) -> pd.DataFrame:
@@ -55,10 +81,29 @@ def ordered_chapters(df: pd.DataFrame) -> pd.DataFrame:
     return df.assign(_orden=df["capitulo"].map(order).fillna(99)).sort_values("_orden").drop(columns=["_orden"])
 
 
-def metric_card(label: str, value: str, detail: str) -> None:
+def chart_layout(fig: go.Figure, height: int = 420, showlegend: bool = True) -> go.Figure:
+    fig.update_layout(
+        template="plotly_white",
+        height=height,
+        margin=dict(l=24, r=24, t=56, b=28),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font={"family": "Inter, system-ui, sans-serif", "size": 12, "color": "#111827"},
+        legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
+        showlegend=showlegend,
+    )
+    return fig
+
+
+def section_title(title: str, detail: str = "") -> None:
+    suffix = f'<span class="section-detail">{detail}</span>' if detail else ""
+    st.markdown(f'<div class="section-title">{title}{suffix}</div>', unsafe_allow_html=True)
+
+
+def metric_card(label: str, value: str, detail: str, accent: str = "#2563eb") -> None:
     st.markdown(
         f"""
-        <div class="metric-card">
+        <div class="metric-card" style="border-left-color:{accent}">
           <div class="metric-label">{label}</div>
           <div class="metric-value">{value}</div>
           <div class="metric-detail">{detail}</div>
@@ -73,12 +118,12 @@ def gauge_chart(value: float, title: str) -> go.Figure:
         go.Indicator(
             mode="gauge+number",
             value=value,
-            number={"suffix": "%", "font": {"size": 42}},
-            title={"text": title, "font": {"size": 16}},
+            number={"suffix": "%", "font": {"size": 44, "color": "#111827"}},
+            title={"text": title, "font": {"size": 16, "color": "#374151"}},
             gauge={
-                "axis": {"range": [0, 100]},
-                "bar": {"color": "#2563eb"},
-                "bgcolor": "#eef2ff",
+                "axis": {"range": [0, 100], "tickwidth": 0},
+                "bar": {"color": "#2563eb", "thickness": 0.28},
+                "bgcolor": "#f8fafc",
                 "borderwidth": 0,
                 "steps": [
                     {"range": [0, 30], "color": "#fee2e2"},
@@ -88,15 +133,15 @@ def gauge_chart(value: float, title: str) -> go.Figure:
             },
         )
     )
-    fig.update_layout(height=300, margin=dict(l=20, r=20, t=30, b=20))
-    return fig
+    return chart_layout(fig, height=310, showlegend=False)
 
 
-def radar_chart(df: pd.DataFrame, label_col: str, value_col: str, title: str) -> go.Figure:
+def radar_chart(df: pd.DataFrame, label_col: str, value_col: str, title: str, color: str = "#2563eb") -> go.Figure:
     if df.empty:
-        return go.Figure()
-    labels = df[label_col].astype(str).tolist()
-    values = df[value_col].astype(float).round(1).tolist()
+        return chart_layout(go.Figure(), height=430, showlegend=False)
+    frame = df.copy()
+    labels = frame[label_col].astype(str).tolist()
+    values = frame[value_col].astype(float).clip(0, 100).round(1).tolist()
     labels_closed = labels + labels[:1]
     values_closed = values + values[:1]
     fig = go.Figure()
@@ -106,18 +151,177 @@ def radar_chart(df: pd.DataFrame, label_col: str, value_col: str, title: str) ->
             theta=labels_closed,
             fill="toself",
             name=title,
-            line={"color": "#2563eb", "width": 2},
-            fillcolor="rgba(37, 99, 235, 0.22)",
+            line={"color": color, "width": 2},
+            fillcolor=color.replace("#", "rgba(") if False else "rgba(37, 99, 235, 0.18)",
         )
     )
-    fig.update_layout(
-        title=title,
-        polar={"radialaxis": {"visible": True, "range": [0, 100]}},
-        showlegend=False,
-        height=430,
-        margin=dict(l=40, r=40, t=60, b=30),
+    fig.update_layout(title=title, polar={"radialaxis": {"visible": True, "range": [0, 100]}}, showlegend=False)
+    return chart_layout(fig, height=440, showlegend=False)
+
+
+def maturity_stack(matrix: pd.DataFrame) -> pd.DataFrame:
+    if matrix.empty:
+        return pd.DataFrame()
+    maturity_cols = [col for col in MATURITY_ORDER if col in matrix.columns]
+    return matrix.melt(id_vars="capitulo", value_vars=maturity_cols, var_name="madurez", value_name="controles")
+
+
+def pareto_chart(df: pd.DataFrame, title: str) -> go.Figure:
+    if df.empty:
+        return chart_layout(go.Figure(), height=520, showlegend=False)
+    pareto = df.sort_values("peso_brecha", ascending=False).head(20).copy()
+    total = max(float(pareto["peso_brecha"].sum()), 1.0)
+    pareto["brecha_acum_pct"] = pareto["peso_brecha"].cumsum() / total * 100
+    pareto["control_label"] = pareto["control_id"].astype(str) + " · " + pareto["control_nombre"].map(lambda x: short_text(x, 34))
+
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig.add_trace(
+        go.Bar(
+            x=pareto["control_label"],
+            y=pareto["peso_brecha"],
+            marker_color=pareto["capitulo"].map(CHAPTER_COLORS).fillna("#64748b"),
+            name="Brecha ponderada",
+            hovertext=pareto["hallazgo"],
+        ),
+        secondary_y=False,
     )
-    return fig
+    fig.add_trace(
+        go.Scatter(
+            x=pareto["control_label"],
+            y=pareto["brecha_acum_pct"],
+            mode="lines+markers",
+            marker={"color": "#111827", "size": 7},
+            line={"color": "#111827", "width": 2},
+            name="Acumulado %",
+        ),
+        secondary_y=True,
+    )
+    fig.update_xaxes(tickangle=-35)
+    fig.update_yaxes(title_text="Brecha ponderada", secondary_y=False)
+    fig.update_yaxes(title_text="Acumulado %", range=[0, 105], secondary_y=True)
+    fig.update_layout(title=title)
+    return chart_layout(fig, height=540)
+
+
+def impact_matrix(df: pd.DataFrame) -> go.Figure:
+    if df.empty:
+        return chart_layout(go.Figure(), height=440, showlegend=False)
+    frame = df.copy()
+    effort_threshold = frame.loc[frame["esfuerzo_jornadas"] > 0, "esfuerzo_jornadas"].median()
+    priority_threshold = frame.loc[frame["prioridad"] > 0, "prioridad"].median()
+    effort_threshold = float(effort_threshold) if pd.notna(effort_threshold) else 0.0
+    priority_threshold = float(priority_threshold) if pd.notna(priority_threshold) else 0.0
+    fig = px.scatter(
+        frame,
+        x="esfuerzo_jornadas",
+        y="prioridad",
+        size="controles_relacionados",
+        color="cuadrante",
+        hover_name="titulo",
+        hover_data=["proyecto_id", "plazo", "tipo_seguridad", "controles_relacionados"],
+        color_discrete_map=QUADRANT_COLORS,
+        labels={"esfuerzo_jornadas": "Esfuerzo (jornadas)", "prioridad": "Impacto / prioridad"},
+    )
+    fig.add_vline(x=effort_threshold, line_width=1, line_dash="dash", line_color="#94a3b8")
+    fig.add_hline(y=priority_threshold, line_width=1, line_dash="dash", line_color="#94a3b8")
+    fig.update_layout(title="Matriz esfuerzo / impacto")
+    return chart_layout(fig, height=470)
+
+
+def roadmap_chart(df: pd.DataFrame) -> go.Figure:
+    if df.empty:
+        return chart_layout(go.Figure(), height=430, showlegend=False)
+    frame = df.head(20).copy()
+    frame["label"] = frame["proyecto_id"].astype(str) + " · " + frame["titulo"].map(lambda x: short_text(x, 28))
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig.add_trace(
+        go.Bar(
+            x=frame["label"],
+            y=frame["esfuerzo_jornadas"],
+            marker_color=frame["plazo"].map({"Corto": "#16a34a", "Medio": "#f59e0b", "Largo": "#dc2626"}).fillna("#64748b"),
+            name="Esfuerzo",
+        ),
+        secondary_y=False,
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=frame["label"],
+            y=frame["esfuerzo_acumulado"],
+            fill="tozeroy",
+            mode="lines+markers",
+            marker={"color": "#7c3aed", "size": 6},
+            line={"color": "#7c3aed", "width": 2},
+            name="Esfuerzo acumulado",
+        ),
+        secondary_y=True,
+    )
+    fig.update_xaxes(tickangle=-35)
+    fig.update_yaxes(title_text="Jornadas", secondary_y=False)
+    fig.update_yaxes(title_text="Jornadas acumuladas", secondary_y=True)
+    fig.update_layout(title="Esfuerzo a optimizado")
+    return chart_layout(fig, height=500)
+
+
+def sankey_chart(trazabilidad: pd.DataFrame) -> go.Figure:
+    if trazabilidad.empty:
+        return chart_layout(go.Figure(), height=520, showlegend=False)
+    top_controls = (
+        trazabilidad.groupby(["capitulo", "control_id", "control_nombre"], as_index=False)["peso_brecha"]
+        .sum()
+        .sort_values("peso_brecha", ascending=False)
+        .head(16)
+    )
+    frame = trazabilidad.merge(top_controls[["control_id"]], on="control_id", how="inner")
+    frame = frame[frame["proyecto_id"].notna()].copy()
+    if frame.empty:
+        return chart_layout(go.Figure(), height=520, showlegend=False)
+
+    chapter_links = (
+        frame.groupby(["capitulo", "control_id", "control_nombre"], as_index=False)["peso_brecha"].sum()
+    )
+    project_links = (
+        frame.groupby(["control_id", "control_nombre", "proyecto_id", "titulo"], as_index=False)["peso_brecha"].sum()
+    )
+
+    labels: list[str] = []
+    colors: list[str] = []
+    index: dict[str, int] = {}
+
+    def node(key: str, label: str, color: str) -> int:
+        if key not in index:
+            index[key] = len(labels)
+            labels.append(label)
+            colors.append(color)
+        return index[key]
+
+    sources: list[int] = []
+    targets: list[int] = []
+    values: list[float] = []
+
+    for _, row in chapter_links.iterrows():
+        chapter_key = f"cap:{row['capitulo']}"
+        control_key = f"ctrl:{row['control_id']}"
+        sources.append(node(chapter_key, str(row["capitulo"]), CHAPTER_COLORS.get(row["capitulo"], "#64748b")))
+        targets.append(node(control_key, f"{row['control_id']} · {short_text(row['control_nombre'], 26)}", "#94a3b8"))
+        values.append(max(float(row["peso_brecha"]), 0.01))
+
+    for _, row in project_links.iterrows():
+        control_key = f"ctrl:{row['control_id']}"
+        project_key = f"proy:{row['proyecto_id']}"
+        sources.append(node(control_key, f"{row['control_id']} · {short_text(row['control_nombre'], 26)}", "#94a3b8"))
+        targets.append(node(project_key, f"{row['proyecto_id']} · {short_text(row['titulo'], 28)}", "#0f766e"))
+        values.append(max(float(row["peso_brecha"]), 0.01))
+
+    fig = go.Figure(
+        data=[
+            go.Sankey(
+                node={"pad": 12, "thickness": 14, "line": {"color": "#e5e7eb", "width": 0.5}, "label": labels, "color": colors},
+                link={"source": sources, "target": targets, "value": values, "color": "rgba(37, 99, 235, 0.18)"},
+            )
+        ]
+    )
+    fig.update_layout(title="Trazabilidad capítulo → control → proyecto")
+    return chart_layout(fig, height=560, showlegend=False)
 
 
 def download_button(label: str, df: pd.DataFrame, filename: str) -> None:
@@ -128,41 +332,49 @@ st.set_page_config(page_title="TP2 Seguridad - Tablero", layout="wide")
 st.markdown(
     """
     <style>
-      .main .block-container { padding-top: 1.1rem; }
+      .main .block-container { padding-top: 1rem; max-width: 1520px; }
       .metric-card {
         border: 1px solid #d8dee9;
-        border-left: 4px solid #2563eb;
+        border-left: 5px solid #2563eb;
         border-radius: 8px;
         padding: 14px 16px;
-        background: #ffffff;
-        min-height: 116px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        min-height: 118px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
       }
       .metric-label {
-        color: #4b5563;
-        font-size: 0.82rem;
+        color: #475569;
+        font-size: 0.76rem;
         text-transform: uppercase;
         letter-spacing: 0.02em;
-        font-weight: 700;
+        font-weight: 800;
       }
       .metric-value {
         color: #111827;
-        font-size: 2.05rem;
-        line-height: 1.1;
-        font-weight: 800;
-        margin-top: 6px;
+        font-size: 2rem;
+        line-height: 1.08;
+        font-weight: 850;
+        margin-top: 7px;
       }
       .metric-detail {
-        color: #6b7280;
-        font-size: 0.9rem;
-        margin-top: 5px;
+        color: #64748b;
+        font-size: 0.88rem;
+        margin-top: 6px;
       }
       .section-title {
-        margin-top: 8px;
-        margin-bottom: 2px;
+        margin-top: 10px;
+        margin-bottom: 8px;
         font-size: 1.05rem;
-        font-weight: 800;
+        font-weight: 850;
         color: #111827;
       }
+      .section-detail {
+        margin-left: 10px;
+        color: #64748b;
+        font-size: 0.86rem;
+        font-weight: 650;
+      }
+      div[data-testid="stTabs"] button p { font-weight: 750; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -191,27 +403,28 @@ filtered = controles[
     & controles["entrevistado"].isin(selected_interviewees if selected_interviewees else available_interviewees)
 ].copy()
 
-tab_resumen, tab_madurez, tab_brechas, tab_plan, tab_fuentes, tab_descargas = st.tabs(
-    ["Resumen Ejecutivo", "Madurez ISO", "Brechas", "Plan de Mejora", "Fuentes", "Descargas"]
-)
+story_tabs = st.tabs(["1 Ejecutivo", "2 Mapa ISO", "3 Perfil", "4 Brechas", "5 Plan", "6 Trazabilidad", "7 Descargas"])
+tab_resumen, tab_mapa, tab_perfil, tab_brechas, tab_plan, tab_trazabilidad, tab_descargas = story_tabs
 
 with tab_resumen:
     k1, k2, k3, k4, k5 = st.columns(5)
     with k1:
-        metric_card("Madurez global", pct(resumen["madurez_global_pct"]), "Promedio ponderado")
+        metric_card("Madurez global", pct(resumen["madurez_global_pct"]), "Promedio ponderado", "#2563eb")
     with k2:
-        metric_card("Brecha global", pct(resumen["brecha_global_pct"]), "Distancia a optimizado")
+        metric_card("Brecha global", pct(resumen["brecha_global_pct"]), "Distancia a optimizado", "#dc2626")
     with k3:
-        metric_card("Controles", str(resumen["controles_evaluados"]), "ISO 27002:2022")
+        metric_card("Control critico", resumen["control_mas_critico"], "Mayor brecha ponderada", "#f59e0b")
     with k4:
-        metric_card("Capitulo debil", resumen["capitulo_mas_debil"].split(" - ", 1)[0], resumen["capitulo_mas_debil"])
+        metric_card("Capacidad debil", short_text(resumen["capacidad_mas_debil"], 22), "Menor madurez", "#7c3aed")
     with k5:
-        metric_card("Proyecto prioritario", resumen["proyecto_prioritario"], "Mayor impacto calculado")
+        metric_card("Quick wins", str(resumen["quick_wins"]), "Impacto alto / esfuerzo bajo", "#16a34a")
 
-    left, center, right = st.columns([1.05, 1.25, 1.2])
+    left, center, right = st.columns([1, 1.3, 1.1])
     with left:
+        section_title("Postura general")
         st.plotly_chart(gauge_chart(resumen["madurez_global_pct"], "Madurez global"), width="stretch")
     with center:
+        section_title("Madurez por capitulo")
         caps = ordered_chapters(result.capitulos.copy())
         fig = px.bar(
             caps,
@@ -219,13 +432,14 @@ with tab_resumen:
             y="madurez_pct",
             color="capitulo",
             text=caps["madurez_pct"].round(1),
-            color_discrete_sequence=PALETTE,
+            color_discrete_map=CHAPTER_COLORS,
             labels={"madurez_pct": "Madurez %", "capitulo": ""},
             range_y=[0, 100],
         )
-        fig.update_layout(showlegend=False, height=300, margin=dict(l=20, r=20, t=30, b=20))
-        st.plotly_chart(fig, width="stretch")
+        fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
+        st.plotly_chart(chart_layout(fig, height=330, showlegend=False), width="stretch")
     with right:
+        section_title("Distribucion CMMI")
         dist = result.madurez_distribucion.copy()
         fig = px.pie(
             dist,
@@ -233,24 +447,26 @@ with tab_resumen:
             values="controles",
             hole=0.58,
             color="madurez_nombre",
-            color_discrete_sequence=PALETTE,
+            color_discrete_map=MATURITY_COLORS,
         )
-        fig.update_layout(height=300, margin=dict(l=20, r=20, t=30, b=20))
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(chart_layout(fig, height=330), width="stretch")
 
     r1, r2 = st.columns(2)
     with r1:
+        section_title("Radar ejecutivo")
         caps_radar = ordered_chapters(result.capitulos.copy())
-        st.plotly_chart(radar_chart(caps_radar, "capitulo", "madurez_pct", "Madurez por capitulo"), width="stretch")
+        st.plotly_chart(radar_chart(caps_radar, "capitulo", "madurez_pct", "Madurez por capitulo", "#2563eb"), width="stretch")
     with r2:
+        section_title("Capacidades operacionales")
         st.plotly_chart(
-            radar_chart(result.capacidad_operacional.sort_values("madurez_pct").head(12), "atributo", "madurez_pct", "Capacidad operacional"),
+            radar_chart(result.capacidad_operacional.sort_values("madurez_pct").head(12), "atributo", "madurez_pct", "Capacidad operacional", "#7c3aed"),
             width="stretch",
         )
 
-with tab_madurez:
+with tab_mapa:
     m1, m2 = st.columns([1.25, 1])
     with m1:
+        section_title("Mapa de madurez ISO")
         matrix = ordered_chapters(result.matriz_madurez.copy())
         maturity_cols = [col for col in MATURITY_ORDER if col in matrix.columns]
         fig = px.imshow(
@@ -261,25 +477,60 @@ with tab_madurez:
             color_continuous_scale="Blues",
             labels={"x": "Nivel CMMI", "y": "Capitulo", "color": "Controles"},
         )
-        fig.update_layout(height=430, margin=dict(l=20, r=20, t=30, b=20))
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(chart_layout(fig, height=440, showlegend=False), width="stretch")
     with m2:
+        section_title("CMMI por capitulo")
+        stacked = maturity_stack(ordered_chapters(result.matriz_madurez.copy()))
         fig = px.bar(
-            result.madurez_distribucion,
-            x="madurez_nombre",
+            stacked,
+            x="capitulo",
             y="controles",
-            color="madurez_nombre",
-            text="controles",
-            color_discrete_sequence=PALETTE,
-            labels={"madurez_nombre": "Nivel", "controles": "Controles"},
+            color="madurez",
+            color_discrete_map=MATURITY_COLORS,
+            labels={"capitulo": "", "controles": "Controles", "madurez": "Madurez"},
         )
-        fig.update_layout(showlegend=False, height=430, margin=dict(l=20, r=20, t=30, b=20))
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(chart_layout(fig, height=440), width="stretch")
 
-    a1, a2, a3 = st.columns(3)
-    with a1:
-        st.plotly_chart(radar_chart(result.ciberfunciones, "atributo", "madurez_pct", "Funciones de ciberseguridad"), width="stretch")
-    with a2:
+    section_title("Superficie de controles")
+    treemap_df = filtered.copy()
+    treemap_df["control_label"] = treemap_df["control_id"].astype(str) + " · " + treemap_df["control_nombre"].map(lambda x: short_text(x, 42))
+    fig = px.treemap(
+        treemap_df,
+        path=["capitulo", "control_label"],
+        values="peso",
+        color="cumplimiento_pct",
+        color_continuous_scale=["#dc2626", "#f59e0b", "#16a34a"],
+        range_color=[0, 100],
+        hover_data=["madurez_nombre", "peso_brecha", "entrevistado"],
+    )
+    fig.update_layout(title="Controles por capitulo coloreados por madurez")
+    st.plotly_chart(chart_layout(fig, height=560, showlegend=False), width="stretch")
+
+with tab_perfil:
+    p1, p2 = st.columns([1, 1.2])
+    with p1:
+        section_title("Funciones de ciberseguridad")
+        st.plotly_chart(radar_chart(result.ciberfunciones, "atributo", "madurez_pct", "Funciones", "#0891b2"), width="stretch")
+    with p2:
+        section_title("Capacidad operacional")
+        cap = result.capacidad_operacional.sort_values("madurez_pct", ascending=True)
+        fig = px.bar(
+            cap,
+            x="madurez_pct",
+            y="atributo",
+            orientation="h",
+            color="brecha_pct",
+            text=cap["madurez_pct"].round(1),
+            color_continuous_scale=["#16a34a", "#f59e0b", "#dc2626"],
+            range_x=[0, 100],
+            labels={"madurez_pct": "Madurez %", "atributo": "", "brecha_pct": "Brecha %"},
+        )
+        fig.update_traces(texttemplate="%{text:.1f}%")
+        st.plotly_chart(chart_layout(fig, height=520, showlegend=False), width="stretch")
+
+    s1, s2, s3 = st.columns(3)
+    with s1:
+        section_title("CID")
         fig = px.bar(
             result.propiedades_seguridad,
             x="madurez_pct",
@@ -289,10 +540,11 @@ with tab_madurez:
             text=result.propiedades_seguridad["madurez_pct"].round(1) if not result.propiedades_seguridad.empty else None,
             color_discrete_sequence=PALETTE,
             range_x=[0, 100],
+            labels={"madurez_pct": "Madurez %", "atributo": ""},
         )
-        fig.update_layout(showlegend=False, height=430, margin=dict(l=20, r=20, t=30, b=20))
-        st.plotly_chart(fig, width="stretch")
-    with a3:
+        st.plotly_chart(chart_layout(fig, height=390, showlegend=False), width="stretch")
+    with s2:
+        section_title("Tipo de control")
         fig = px.bar(
             result.tipo_control,
             x="madurez_pct",
@@ -302,27 +554,45 @@ with tab_madurez:
             text=result.tipo_control["madurez_pct"].round(1) if not result.tipo_control.empty else None,
             color_discrete_sequence=PALETTE,
             range_x=[0, 100],
+            labels={"madurez_pct": "Madurez %", "atributo": ""},
         )
-        fig.update_layout(showlegend=False, height=430, margin=dict(l=20, r=20, t=30, b=20))
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(chart_layout(fig, height=390, showlegend=False), width="stretch")
+    with s3:
+        section_title("Dominios")
+        fig = px.bar(
+            result.dominios_seguridad,
+            x="madurez_pct",
+            y="atributo",
+            orientation="h",
+            color="atributo",
+            text=result.dominios_seguridad["madurez_pct"].round(1) if not result.dominios_seguridad.empty else None,
+            color_discrete_sequence=PALETTE,
+            range_x=[0, 100],
+            labels={"madurez_pct": "Madurez %", "atributo": ""},
+        )
+        st.plotly_chart(chart_layout(fig, height=390, showlegend=False), width="stretch")
 
 with tab_brechas:
-    top_filtered = filtered.sort_values(["peso_brecha", "peso"], ascending=False).head(15).copy()
-    b1, b2 = st.columns([1.25, 1])
+    section_title("Pareto de brechas")
+    st.plotly_chart(pareto_chart(filtered, "Controles que explican la brecha"), width="stretch")
+
+    b1, b2 = st.columns([1.05, 1])
     with b1:
-        fig = px.bar(
-            top_filtered.sort_values("peso_brecha"),
-            x="peso_brecha",
-            y="control_id",
-            orientation="h",
-            color="capitulo",
-            hover_data=["control_nombre", "madurez_nombre", "hallazgo"],
-            labels={"peso_brecha": "Brecha ponderada", "control_id": "Control"},
-            color_discrete_sequence=PALETTE,
+        section_title("Concentracion de riesgo")
+        risk_df = filtered.copy()
+        risk_df["control_label"] = risk_df["control_id"].astype(str) + " · " + risk_df["control_nombre"].map(lambda x: short_text(x, 36))
+        fig = px.treemap(
+            risk_df.sort_values("peso_brecha", ascending=False).head(35),
+            path=["capitulo", "control_label"],
+            values="peso_brecha",
+            color="brecha_pct",
+            color_continuous_scale=["#fef3c7", "#f97316", "#991b1b"],
+            hover_data=["madurez_nombre", "hallazgo", "entrevistado"],
         )
-        fig.update_layout(height=520, margin=dict(l=20, r=20, t=30, b=20))
-        st.plotly_chart(fig, width="stretch")
+        fig.update_layout(title="Brecha por capitulo y control")
+        st.plotly_chart(chart_layout(fig, height=520, showlegend=False), width="stretch")
     with b2:
+        section_title("Madurez vs brecha")
         fig = px.scatter(
             filtered,
             x="cumplimiento_pct",
@@ -332,10 +602,10 @@ with tab_brechas:
             hover_name="control_id",
             hover_data=["control_nombre", "madurez_nombre", "entrevistado"],
             labels={"cumplimiento_pct": "Madurez %", "peso_brecha": "Brecha ponderada"},
-            color_discrete_sequence=PALETTE,
+            color_discrete_map=CHAPTER_COLORS,
         )
-        fig.update_layout(height=520, margin=dict(l=20, r=20, t=30, b=20))
-        st.plotly_chart(fig, width="stretch")
+        fig.add_vline(x=70, line_width=1, line_dash="dash", line_color="#94a3b8")
+        st.plotly_chart(chart_layout(fig, height=520), width="stretch")
 
     table_cols = [
         "control_id",
@@ -351,48 +621,86 @@ with tab_brechas:
     st.dataframe(filtered[table_cols].sort_values("peso_brecha", ascending=False), width="stretch", hide_index=True)
 
 with tab_plan:
-    p1, p2, p3 = st.columns([1.1, 1, 1])
+    q1, q2, q3, q4 = st.columns(4)
+    with q1:
+        metric_card("Proyectos", str(resumen["proyectos"]), "Cartera total", "#2563eb")
+    with q2:
+        metric_card("Esfuerzo", num(resumen["esfuerzo_total"]), "Jornadas estimadas", "#7c3aed")
+    with q3:
+        metric_card("Quick wins", str(resumen["quick_wins"]), "Prioridad alta / bajo esfuerzo", "#16a34a")
+    with q4:
+        metric_card("Proyecto lider", resumen["proyecto_prioritario"], "Mayor prioridad", "#f59e0b")
+
+    p1, p2, p3 = st.columns([1.05, 1, 1])
     with p1:
+        section_title("Plan por plazo")
+        plazo = result.proyectos_plazo.copy()
         fig = px.bar(
-            result.proyectos_plazo,
+            plazo,
             x="plazo",
             y="prioridad",
             color="plazo",
-            text=result.proyectos_plazo["prioridad"].round(2) if not result.proyectos_plazo.empty else None,
-            color_discrete_sequence=PALETTE,
+            text=plazo["prioridad"].round(2) if not plazo.empty else None,
+            color_discrete_map={"Corto": "#16a34a", "Medio": "#f59e0b", "Largo": "#dc2626", "": "#64748b"},
             labels={"prioridad": "Prioridad acumulada", "plazo": "Plazo"},
         )
-        fig.update_layout(showlegend=False, height=360, margin=dict(l=20, r=20, t=30, b=20))
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(chart_layout(fig, height=380, showlegend=False), width="stretch")
     with p2:
-        fig = px.pie(
-            result.proyectos_tipo,
-            names="tipo",
-            values="controles",
-            hole=0.5,
-            color_discrete_sequence=PALETTE,
-        )
-        fig.update_layout(height=360, margin=dict(l=20, r=20, t=30, b=20))
-        st.plotly_chart(fig, width="stretch")
+        section_title("Compromiso por plazo")
+        fig = px.pie(plazo, names="plazo", values="proyectos", hole=0.5, color="plazo", color_discrete_sequence=PALETTE)
+        st.plotly_chart(chart_layout(fig, height=380), width="stretch")
     with p3:
-        fig = px.scatter(
-            result.proyectos,
-            x="esfuerzo_jornadas",
-            y="prioridad",
-            size="controles_relacionados",
-            color="plazo",
-            hover_name="titulo",
-            hover_data=["proyecto_id", "tipo_seguridad", "controles_relacionados"],
-            color_discrete_sequence=PALETTE,
-            labels={"esfuerzo_jornadas": "Esfuerzo jornadas", "prioridad": "Prioridad"},
-        )
-        fig.update_layout(height=360, margin=dict(l=20, r=20, t=30, b=20))
-        st.plotly_chart(fig, width="stretch")
+        section_title("Tipo de proyecto")
+        fig = px.pie(result.proyectos_tipo, names="tipo", values="controles", hole=0.5, color_discrete_sequence=PALETTE)
+        st.plotly_chart(chart_layout(fig, height=380), width="stretch")
 
-    project_table = result.proyectos[
+    p4, p5 = st.columns([1, 1.1])
+    with p4:
+        section_title("Plan por capitulo")
+        cap_plan = ordered_chapters(result.proyectos_capitulo.copy())
+        fig = px.bar(
+            cap_plan,
+            x="capitulo",
+            y="prioridad",
+            color="capitulo",
+            text=cap_plan["proyectos"] if not cap_plan.empty else None,
+            color_discrete_map=CHAPTER_COLORS,
+            labels={"prioridad": "Prioridad", "capitulo": ""},
+        )
+        st.plotly_chart(chart_layout(fig, height=430, showlegend=False), width="stretch")
+    with p5:
+        section_title("Plan por capacidad operacional")
+        cap_plan_radar = result.proyectos_capacidad.sort_values("prioridad", ascending=False).head(12)
+        st.plotly_chart(radar_chart(cap_plan_radar, "capacidad", "prioridad_pct", "Prioridad relativa por capacidad", "#0891b2"), width="stretch")
+
+    e1, e2 = st.columns([1.05, 1])
+    with e1:
+        section_title("Roadmap de esfuerzo")
+        st.plotly_chart(roadmap_chart(result.esfuerzo_roadmap), width="stretch")
+    with e2:
+        section_title("Quick wins")
+        st.plotly_chart(impact_matrix(result.quick_wins), width="stretch")
+
+    section_title("Esfuerzo por proyecto")
+    effort = result.proyectos.sort_values("esfuerzo_jornadas", ascending=False).head(18).copy()
+    effort["label"] = effort["proyecto_id"].astype(str) + " · " + effort["titulo"].map(lambda x: short_text(x, 34))
+    fig = px.bar(
+        effort.sort_values("esfuerzo_jornadas"),
+        x="esfuerzo_jornadas",
+        y="label",
+        orientation="h",
+        color="plazo",
+        hover_data=["prioridad", "controles_relacionados", "tipo_seguridad"],
+        color_discrete_sequence=PALETTE,
+        labels={"esfuerzo_jornadas": "Jornadas", "label": ""},
+    )
+    st.plotly_chart(chart_layout(fig, height=560), width="stretch")
+
+    project_table = result.quick_wins[
         [
             "proyecto_id",
             "titulo",
+            "cuadrante",
             "plazo",
             "tipo_seguridad",
             "esfuerzo_jornadas",
@@ -404,18 +712,19 @@ with tab_plan:
     ].copy()
     st.dataframe(project_table, width="stretch", hide_index=True)
 
-with tab_fuentes:
-    c1, c2 = st.columns([1, 1.1])
-    with c1:
-        st.markdown('<div class="section-title">Metadata del dataset</div>', unsafe_allow_html=True)
-        st.json(result.empresa)
-        st.markdown('<div class="section-title">Entrevistas</div>', unsafe_allow_html=True)
+with tab_trazabilidad:
+    section_title("Cadena de decision")
+    st.plotly_chart(sankey_chart(result.trazabilidad), width="stretch")
+
+    t1, t2 = st.columns([1, 1.1])
+    with t1:
+        section_title("Entrevistas")
         if result.entrevistas.empty:
             st.info("No hay entrevistas registradas para esta empresa.")
         else:
             st.dataframe(result.entrevistas, width="stretch", hide_index=True)
-    with c2:
-        st.markdown('<div class="section-title">Trazabilidad de fuentes</div>', unsafe_allow_html=True)
+    with t2:
+        section_title("Fuentes")
         source_rows = [
             {"archivo": "datos/estandares/iso27002_2022/catalogo_controles.csv", "contenido": "Catalogo ISO 27002:2022 y atributos de control"},
             {"archivo": f"datos/empresas/{selected}/diagnostico.csv", "contenido": "Evaluacion de madurez por control"},
@@ -424,35 +733,28 @@ with tab_fuentes:
             {"archivo": f"datos/empresas/{selected}/entrevistas.csv", "contenido": "Entrevistados, cuando existe"},
         ]
         st.dataframe(pd.DataFrame(source_rows), width="stretch", hide_index=True)
-        st.markdown('<div class="section-title">Resumen de cobertura</div>', unsafe_allow_html=True)
-        st.dataframe(
-            pd.DataFrame(
-                [
-                    {"dimension": "Capitulos ISO", "valor": str(resumen["capitulos_evaluados"])},
-                    {"dimension": "Controles evaluados", "valor": str(resumen["controles_evaluados"])},
-                    {"dimension": "Entrevistas", "valor": str(resumen["entrevistas"])},
-                    {"dimension": "Proyectos", "valor": str(resumen["proyectos"])},
-                    {"dimension": "Capacidad mas debil", "valor": str(resumen["capacidad_mas_debil"])},
-                    {"dimension": "Funcion mas debil", "valor": str(resumen["funcion_mas_debil"])},
-                ]
-            ),
-            width="stretch",
-            hide_index=True,
-        )
+
+    section_title("Relacion control-proyecto")
+    trace_cols = ["capitulo", "control_id", "control_nombre", "proyecto_id", "titulo", "plazo", "peso_brecha", "prioridad"]
+    st.dataframe(result.trazabilidad[trace_cols].sort_values("peso_brecha", ascending=False), width="stretch", hide_index=True)
 
 with tab_descargas:
-    d1, d2, d3 = st.columns(3)
+    d1, d2, d3, d4 = st.columns(4)
     with d1:
         download_button("metricas.csv", result.controles, f"{selected}_metricas.csv")
         download_button("capitulos.csv", result.capitulos, f"{selected}_capitulos.csv")
         download_button("madurez_distribucion.csv", result.madurez_distribucion, f"{selected}_madurez_distribucion.csv")
     with d2:
+        download_button("matriz_madurez.csv", result.matriz_madurez, f"{selected}_matriz_madurez.csv")
         download_button("capacidad_operacional.csv", result.capacidad_operacional, f"{selected}_capacidad_operacional.csv")
         download_button("ciberfunciones.csv", result.ciberfunciones, f"{selected}_ciberfunciones.csv")
-        download_button("matriz_madurez.csv", result.matriz_madurez, f"{selected}_matriz_madurez.csv")
     with d3:
         download_button("proyectos_priorizados.csv", result.proyectos, f"{selected}_proyectos.csv")
-        download_button("proyectos_por_plazo.csv", result.proyectos_plazo, f"{selected}_proyectos_por_plazo.csv")
+        download_button("proyectos_por_capitulo.csv", result.proyectos_capitulo, f"{selected}_proyectos_por_capitulo.csv")
+        download_button("proyectos_por_capacidad.csv", result.proyectos_capacidad, f"{selected}_proyectos_por_capacidad.csv")
+    with d4:
+        download_button("quick_wins.csv", result.quick_wins, f"{selected}_quick_wins.csv")
+        download_button("trazabilidad.csv", result.trazabilidad, f"{selected}_trazabilidad.csv")
         resumen_json = json.dumps(result.resumen, ensure_ascii=False, indent=2).encode("utf-8")
         st.download_button("resumen.json", resumen_json, file_name=f"{selected}_resumen.json", mime="application/json")
 

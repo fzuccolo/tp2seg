@@ -24,6 +24,11 @@ def test_ejemplo_genera_dimensiones_del_tablero():
     assert not result.capacidad_operacional.empty
     assert not result.ciberfunciones.empty
     assert not result.proyectos_plazo.empty
+    assert not result.proyectos_capitulo.empty
+    assert not result.proyectos_capacidad.empty
+    assert not result.esfuerzo_roadmap.empty
+    assert not result.quick_wins.empty
+    assert not result.trazabilidad.empty
 
 
 def test_madurez_global_esta_en_rango():

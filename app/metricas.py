@@ -67,6 +67,8 @@ MATURITY_LABELS = {
     5: "5 - Optimizado",
 }
 
+PLAZO_ORDER = {"Corto": 1, "Medio": 2, "Largo": 3, "": 4}
+
 
 @dataclass(frozen=True)
 class MetricResult:
@@ -84,6 +86,11 @@ class MetricResult:
     dominios_seguridad: pd.DataFrame
     proyectos_plazo: pd.DataFrame
     proyectos_tipo: pd.DataFrame
+    proyectos_capitulo: pd.DataFrame
+    proyectos_capacidad: pd.DataFrame
+    esfuerzo_roadmap: pd.DataFrame
+    quick_wins: pd.DataFrame
+    trazabilidad: pd.DataFrame
     entrevistas: pd.DataFrame
     resumen: dict[str, Any]
 
@@ -156,6 +163,107 @@ def _maturity_matrix(controles: pd.DataFrame) -> pd.DataFrame:
     )
     ordered_columns = ["capitulo"] + [label for label in MATURITY_LABELS.values() if label in matrix.columns]
     return matrix.loc[:, ordered_columns]
+
+
+def _pct_of_max(series: pd.Series) -> pd.Series:
+    max_value = float(series.max()) if not series.empty else 0.0
+    if max_value <= 0:
+        return pd.Series([0.0] * len(series), index=series.index)
+    return series / max_value * 100
+
+
+def _project_chapter_summary(trazabilidad: pd.DataFrame) -> pd.DataFrame:
+    if trazabilidad.empty or "capitulo" not in trazabilidad.columns:
+        return pd.DataFrame()
+    base = trazabilidad[trazabilidad["capitulo"].notna()].copy()
+    if base.empty:
+        return pd.DataFrame()
+
+    control_summary = (
+        base.groupby("capitulo", as_index=False)
+        .agg(controles=("control_id", "nunique"), brecha_asociada=("peso_brecha", "sum"))
+    )
+    project_summary = (
+        base.drop_duplicates(["capitulo", "proyecto_id"])
+        .groupby("capitulo", as_index=False)
+        .agg(
+            proyectos=("proyecto_id", "nunique"),
+            esfuerzo_jornadas=("esfuerzo_jornadas", "sum"),
+            prioridad=("prioridad", "sum"),
+        )
+    )
+    summary = control_summary.merge(project_summary, on="capitulo", how="outer").fillna(0)
+    summary["prioridad_pct"] = _pct_of_max(summary["prioridad"])
+    return summary.sort_values("prioridad", ascending=False)
+
+
+def _project_capacity_summary(trazabilidad: pd.DataFrame) -> pd.DataFrame:
+    if trazabilidad.empty:
+        return pd.DataFrame()
+    rows: list[dict[str, Any]] = []
+    for column, label in OPERATIONAL_CAPABILITIES.items():
+        if column not in trazabilidad.columns:
+            continue
+        values = pd.to_numeric(trazabilidad[column], errors="coerce").fillna(0)
+        subset = trazabilidad[values > 0].copy()
+        if subset.empty:
+            continue
+        project_once = subset.drop_duplicates("proyecto_id")
+        rows.append(
+            {
+                "capacidad": label,
+                "controles": int(subset["control_id"].nunique()),
+                "proyectos": int(project_once["proyecto_id"].nunique()),
+                "esfuerzo_jornadas": float(project_once["esfuerzo_jornadas"].sum()),
+                "prioridad": float(project_once["prioridad"].sum()),
+                "brecha_asociada": float(subset["peso_brecha"].sum()),
+            }
+        )
+    df = pd.DataFrame(rows)
+    if df.empty:
+        return df
+    df["prioridad_pct"] = _pct_of_max(df["prioridad"])
+    return df.sort_values("prioridad", ascending=False)
+
+
+def _effort_roadmap(proyectos: pd.DataFrame) -> pd.DataFrame:
+    if proyectos.empty:
+        return pd.DataFrame()
+    roadmap = proyectos.copy()
+    roadmap["plazo_orden"] = roadmap["plazo"].map(PLAZO_ORDER).fillna(4).astype(int)
+    roadmap = roadmap.sort_values(["plazo_orden", "prioridad", "esfuerzo_jornadas"], ascending=[True, False, True]).reset_index(drop=True)
+    roadmap["secuencia"] = roadmap.index + 1
+    roadmap["esfuerzo_acumulado"] = roadmap["esfuerzo_jornadas"].cumsum()
+    roadmap["prioridad_acumulada"] = roadmap["prioridad"].cumsum()
+    total_effort = max(float(roadmap["esfuerzo_jornadas"].sum()), 1.0)
+    roadmap["avance_esfuerzo_pct"] = roadmap["esfuerzo_acumulado"] / total_effort * 100
+    return roadmap
+
+
+def _quick_wins(proyectos: pd.DataFrame) -> pd.DataFrame:
+    if proyectos.empty:
+        return pd.DataFrame()
+    df = proyectos.copy()
+    effort_positive = df.loc[df["esfuerzo_jornadas"] > 0, "esfuerzo_jornadas"]
+    priority_positive = df.loc[df["prioridad"] > 0, "prioridad"]
+    effort_threshold = float(effort_positive.median()) if not effort_positive.empty else 0.0
+    priority_threshold = float(priority_positive.median()) if not priority_positive.empty else 0.0
+
+    def classify(row: pd.Series) -> str:
+        high_priority = row["prioridad"] >= priority_threshold
+        low_effort = row["esfuerzo_jornadas"] <= effort_threshold or effort_threshold == 0
+        if high_priority and low_effort:
+            return "Quick win"
+        if high_priority and not low_effort:
+            return "Proyecto estrategico"
+        if not high_priority and low_effort:
+            return "Mejora tactica"
+        return "Diferir"
+
+    df["cuadrante"] = df.apply(classify, axis=1)
+    order = {"Quick win": 0, "Proyecto estrategico": 1, "Mejora tactica": 2, "Diferir": 3}
+    df["cuadrante_orden"] = df["cuadrante"].map(order).fillna(9).astype(int)
+    return df.sort_values(["cuadrante_orden", "prioridad"], ascending=[True, False])
 
 
 def compute_metrics(dataset: dict[str, Any]) -> MetricResult:
@@ -242,11 +350,16 @@ def compute_metrics(dataset: dict[str, Any]) -> MetricResult:
     for column in PROJECT_TYPES:
         _ensure_numeric(proyectos, column)
 
-    linked = proyecto_control.merge(
-        controles[["control_id", "control_nombre", "capitulo", "peso_brecha", "madurez_valor", "brecha"]],
-        on="control_id",
-        how="left",
-    )
+    control_link_columns = [
+        "control_id",
+        "control_nombre",
+        "capitulo",
+        "peso_brecha",
+        "madurez_valor",
+        "brecha",
+        *OPERATIONAL_CAPABILITIES.keys(),
+    ]
+    linked = proyecto_control.merge(controles[control_link_columns], on="control_id", how="left")
     project_gaps = (
         linked.groupby("proyecto_id", as_index=False)
         .agg(
@@ -261,6 +374,22 @@ def compute_metrics(dataset: dict[str, Any]) -> MetricResult:
     proyectos["madurez_promedio"] = proyectos["madurez_promedio"].fillna(0.0)
     proyectos["prioridad"] = proyectos["brecha_asociada"] * (1 + proyectos["aporte_seguridad"])
     proyectos = proyectos.sort_values(["prioridad", "controles_relacionados"], ascending=False)
+
+    project_cols = ["proyecto_id", "titulo", "plazo", "tipo_seguridad", "esfuerzo_jornadas", "aporte_seguridad", "prioridad"]
+    trazabilidad = linked.merge(proyectos[project_cols], on="proyecto_id", how="left", suffixes=("_control", "_proyecto"))
+    for column in ["plazo", "tipo_seguridad"]:
+        project_column = f"{column}_proyecto"
+        control_column = f"{column}_control"
+        if project_column in trazabilidad.columns:
+            fallback = trazabilidad[control_column] if control_column in trazabilidad.columns else ""
+            trazabilidad[column] = trazabilidad[project_column].fillna(fallback)
+        elif control_column in trazabilidad.columns:
+            trazabilidad[column] = trazabilidad[control_column]
+        else:
+            trazabilidad[column] = ""
+    trazabilidad["peso_brecha"] = trazabilidad["peso_brecha"].fillna(0.0)
+    trazabilidad["prioridad"] = trazabilidad["prioridad"].fillna(0.0)
+    trazabilidad["esfuerzo_jornadas"] = trazabilidad["esfuerzo_jornadas"].fillna(0.0)
 
     proyectos_plazo = (
         proyectos.groupby("plazo", as_index=False)
@@ -284,6 +413,10 @@ def compute_metrics(dataset: dict[str, Any]) -> MetricResult:
             }
         )
     proyectos_tipo = pd.DataFrame(project_type_rows).sort_values("controles", ascending=False)
+    proyectos_capitulo = _project_chapter_summary(trazabilidad)
+    proyectos_capacidad = _project_capacity_summary(trazabilidad)
+    esfuerzo_roadmap = _effort_roadmap(proyectos)
+    quick_wins = _quick_wins(proyectos)
 
     resumen = {
         "empresa_id": dataset["empresa_id"],
@@ -293,6 +426,8 @@ def compute_metrics(dataset: dict[str, Any]) -> MetricResult:
         "capitulos_evaluados": int(capitulos["capitulo"].nunique()),
         "proyectos": int(len(proyectos)),
         "entrevistas": int(len(entrevistas)),
+        "quick_wins": int((quick_wins["cuadrante"] == "Quick win").sum()) if not quick_wins.empty else 0,
+        "esfuerzo_total": round(float(proyectos["esfuerzo_jornadas"].sum()), 1) if not proyectos.empty else 0,
         "madurez_global": round(madurez_global, 4),
         "madurez_global_pct": round(madurez_global * 100, 1),
         "brecha_global": round(brecha_global, 4),
@@ -319,6 +454,11 @@ def compute_metrics(dataset: dict[str, Any]) -> MetricResult:
         dominios_seguridad=dominios_seguridad,
         proyectos_plazo=proyectos_plazo,
         proyectos_tipo=proyectos_tipo,
+        proyectos_capitulo=proyectos_capitulo,
+        proyectos_capacidad=proyectos_capacidad,
+        esfuerzo_roadmap=esfuerzo_roadmap,
+        quick_wins=quick_wins,
+        trazabilidad=trazabilidad,
         entrevistas=entrevistas,
         resumen=resumen,
     )
