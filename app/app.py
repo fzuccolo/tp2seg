@@ -53,10 +53,12 @@ QUADRANT_COLORS = {
     "Mejora tactica": "#f59e0b",
     "Diferir": "#64748b",
 }
+DASHBOARD_CACHE_VERSION = "story-dashboard-v2"
 
 
 @st.cache_data
-def get_result(empresa_id: str):
+def get_result(empresa_id: str, cache_version: str):
+    _ = cache_version
     dataset = load_dataset(empresa_id, ROOT)
     return compute_metrics(dataset)
 
@@ -383,7 +385,7 @@ st.markdown(
 companies = list_companies(ROOT)
 default_idx = companies.index("ejemplo") if "ejemplo" in companies else 0
 selected = st.sidebar.selectbox("Empresa", companies, index=default_idx)
-result = get_result(selected)
+result = get_result(selected, DASHBOARD_CACHE_VERSION)
 resumen = result.resumen
 controles = result.controles.copy()
 
