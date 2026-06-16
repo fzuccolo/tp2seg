@@ -4,3 +4,4 @@ PyYAML>=6,<7
 streamlit>=1.46,<2
 pytest>=8,<9
 python-pptx>=1.0,<2
+kaleido>=0.2,<1

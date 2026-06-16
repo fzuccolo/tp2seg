@@ -14,6 +14,7 @@ from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, MSO_AUTO_SIZE, PP_ALIGN
 from pptx.util import Inches, Pt
 
+from app.defensa import speaker_note_texts
 from app.metricas import MetricResult
 
 
@@ -53,7 +54,7 @@ def write_pptx(result: MetricResult, output_path: Path) -> None:
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     prs.save(output_path)
-    _add_speaker_notes(output_path, _speaker_notes())
+    _add_speaker_notes(output_path, speaker_note_texts(result))
 
 
 def _blank_slide(prs: Presentation, title: str, kicker: str = ""):
@@ -733,59 +734,6 @@ def _slide_traceability(prs: Presentation, result: MetricResult) -> None:
     )
 
 
-def _speaker_notes() -> list[str]:
-    return [
-        _note(
-            "Abrir con una idea simple: no mostramos una planilla, mostramos como el relevamiento del TP1 se convierte en decisiones de seguridad. La historia es **inventario -> diagnostico -> brechas -> plan**.",
-            "**ISO/IEC 27002:2022** es el catalogo de controles. **Grupo 1** identifica formalmente la entrega.",
-        ),
-        _note(
-            "No leer todos los numeros. Usar **38.4% de madurez** y **61.6% de brecha** como mensaje principal: hay base operativa, pero falta formalizacion, medicion y continuidad.",
-            "**Madurez** es el valor actual. **Brecha** es la distancia al objetivo optimizado.",
-        ),
-        _note(
-            "Presentar continuidad. El TP2 no arranca desde cero: toma activos, procesos y criticidad del TP1 para evaluar controles. Esto permite que el tablero tenga contexto de negocio.",
-            "**CID** significa confidencialidad, integridad y disponibilidad. Es la base para entender criticidad de activos.",
-        ),
-        _note(
-            "Esta slide defiende el metodo. Si preguntan de donde sale un numero, la respuesta es siempre la misma: control ISO, evidencia, nivel CMMI y peso.",
-            "**Brecha ponderada** es brecha por peso del control. **Prioridad** combina brecha, esfuerzo y aporte esperado.",
-        ),
-        _note(
-            "Evitar decir que todo esta mal. La lectura correcta es madurez media-baja y brecha distribuida. Eso justifica un plan por etapas.",
-            "**Capitulo mas debil** no significa unico problema; indica por donde empezar a mirar.",
-        ),
-        _note(
-            "Mostrar que todavia hay muchos controles en niveles iniciales o gestionados. La organizacion tiene practicas, pero pocas estan medidas sistematicamente.",
-            "**CMMI 0..5**: 0 inexistente, 1 inicial, 2 gestionado, 3 definido, 4 cuantitativo, 5 optimizado.",
-        ),
-        _note(
-            "Conectar brechas con riesgo real: accesos indebidos, continuidad operativa, evidencia insuficiente y exposicion del e-commerce.",
-            "**Pareto de brechas** ordena controles por impacto de mejora, no por orden numerico del estandar. Si la brecha cruda se repite en 85%, es porque esos controles tienen el mismo nivel CMMI; el ranking usa **brecha ponderada**.",
-        ),
-        _note(
-            "Mostrar que usamos mas de una vista. Los capitulos ISO explican cobertura; las capacidades operacionales explican decisiones de gestion y priorizacion.",
-            "**Capacidad operacional** agrupa controles por funcion de seguridad.",
-        ),
-        _note(
-            "Quick win no significa poco importante. Significa alto impacto con esfuerzo razonable frente al resto de la cartera. El plan prioriza sin ocultar que hay trabajo estructural.",
-            "**Prioridad** combina brecha asociada, esfuerzo y aporte esperado de seguridad.",
-        ),
-        _note(
-            "La demo debe durar 3 a 4 minutos. No navegar libremente: seguir Ejecutivo, Mapa ISO, Brechas, Plan y Trazabilidad.",
-            "**Trazabilidad** permite ir desde el indicador ejecutivo hasta el control y el proyecto.",
-        ),
-        _note(
-            "Cerrar con gestion. El tablero resume 93 controles en decisiones concretas: que mirar, que priorizar y como justificar el plan.",
-            "**Trazabilidad** significa poder ir desde una decision del plan hasta el control y la evidencia que la justifican.",
-        ),
-    ]
-
-
-def _note(narrative: str, references: str) -> str:
-    return f"Narrativa:\n{narrative}\n\nReferencias:\n{references}"
-
-
 def _add_speaker_notes(pptx_path: Path, notes: list[str]) -> None:
     with zipfile.ZipFile(pptx_path, "r") as archive:
         files = {name: archive.read(name) for name in archive.namelist()}
@@ -875,14 +823,21 @@ def _notes_master_xml() -> str:
 
 
 def _notes_slide_xml(note: str) -> str:
+    headings = {
+        "Mensaje principal:",
+        "Narrativa:",
+        "Datos concretos:",
+        "Puente:",
+        "Preguntas esperables:",
+        "Referencias:",
+    }
     paragraphs = []
     for line in note.splitlines():
         text = line.strip()
         if not text:
             paragraphs.append("<a:p/>")
             continue
-        bold = ' b="1"' if text in {"Narrativa:", "Referencias:"} else ""
-        paragraphs.append(f'<a:p><a:r><a:rPr lang="es-AR" sz="1200"{bold}/><a:t>{_xml_escape(text)}</a:t></a:r></a:p>')
+        paragraphs.append(_notes_paragraph_xml(text, text in headings))
     body = "".join(paragraphs)
     return f"""<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <p:notes xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">
@@ -907,6 +862,22 @@ def _notes_slide_rels_xml(index: int) -> str:
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="../slides/slide{index}.xml"/>
   <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesMaster" Target="../notesMasters/notesMaster1.xml"/>
 </Relationships>"""
+
+
+def _notes_paragraph_xml(text: str, heading: bool = False) -> str:
+    if heading:
+        return f'<a:p><a:r><a:rPr lang="es-AR" sz="1200" b="1"/><a:t>{_xml_escape(text)}</a:t></a:r></a:p>'
+
+    parts = re.split(r"(\*\*[^*]+\*\*)", text)
+    runs = []
+    for part in parts:
+        if not part:
+            continue
+        is_bold = part.startswith("**") and part.endswith("**")
+        content = part[2:-2] if is_bold else part
+        bold = ' b="1"' if is_bold else ""
+        runs.append(f'<a:r><a:rPr lang="es-AR" sz="1200"{bold}/><a:t>{_xml_escape(content)}</a:t></a:r>')
+    return f"<a:p>{''.join(runs)}</a:p>"
 
 
 def _xml_escape(text: str) -> str:
