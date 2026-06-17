@@ -35,6 +35,8 @@ En TecnoHogar, la madurez global es **38.4%** y la brecha global es **61.6%**.
 
 El tablero usa los cuatro capítulos evaluables del catálogo: **5 Organizativos**, **6 Personas**, **7 Físicos** y **8 Tecnológicos**. En total se evaluaron **93 controles**.
 
+La forma correcta de explicarlo es: ISO 27002 aporta el **catálogo de controles** y nosotros agregamos una **capa de medición** con CMMI, brecha, ponderación y proyectos. Para estudiar la norma aplicada, leer `iso-27002-guia.md`.
+
 ## CID
 
 **Confidencialidad** protege contra acceso no autorizado. **Integridad** protege contra modificación incorrecta. **Disponibilidad** protege la continuidad de acceso y uso. En el TP1 se usó CID para activos; en el TP2 se usa también para leer controles asociados a esas propiedades.

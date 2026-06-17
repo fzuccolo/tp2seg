@@ -5,9 +5,10 @@ Este directorio es el paquete de estudio para defender el tablero de control de 
 ## Orden recomendado
 
 1. Leer `conceptos-clave.md` para repasar la teoría mínima: métricas, KPI/KGI, CMMI, brecha, riesgo, CID, quick wins y trazabilidad.
-2. Leer `narrativa-presentacion.md` para practicar la historia slide por slide.
-3. Leer `guia-graficos.md` para entender qué dice cada gráfico y cómo responder preguntas.
-4. Leer `demo-en-vivo.md` para practicar el recorrido del tablero y preparar el plan B.
+2. Leer `iso-27002-guia.md` para estudiar la norma aplicada, los capítulos 5 a 8 y cómo se usaron en TecnoHogar.
+3. Leer `narrativa-presentacion.md` para practicar la historia slide por slide.
+4. Leer `guia-graficos.md` para entender qué dice cada gráfico y cómo responder preguntas.
+5. Leer `demo-en-vivo.md` para practicar el recorrido del tablero y preparar el plan B.
 
 ## Números que conviene recordar
 
