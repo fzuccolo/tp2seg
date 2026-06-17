@@ -27,7 +27,7 @@ CHAPTER_STUDY = {
     },
     "6 - Controles de Personas": {
         "foco": "ciclo de vida laboral, concientización, confidencialidad, trabajo remoto, desvinculación y reporte de eventos.",
-        "aplicado": "se usó para medir prácticas de RRHH y usuarios: screening, términos de empleo, capacitación, acuerdos de confidencialidad, teletrabajo y canales de reporte.",
+        "aplicado": "se usó para medir prácticas de Recursos Humanos (RRHH) y usuarios: verificación de antecedentes, términos de empleo, capacitación, acuerdos de confidencialidad, teletrabajo y canales de reporte.",
         "defensa": "este capítulo muestra que seguridad no es sólo tecnología; las personas pueden reducir o amplificar la exposición del negocio.",
     },
     "7 - Controles Físicos": {
@@ -37,7 +37,7 @@ CHAPTER_STUDY = {
     },
     "8 - Controles Tecnológicos": {
         "foco": "endpoints, accesos privilegiados, autenticación, malware, vulnerabilidades, configuración, backup, logs, redes, criptografía y desarrollo seguro.",
-        "aplicado": "se usó para medir la postura técnica del e-commerce y la operación: hardening, IAM/MFA, registros, monitoreo, vulnerabilidades, segregación de redes, SDLC seguro y protección de aplicaciones.",
+        "aplicado": "se usó para medir la postura técnica del e-commerce y la operación: hardening, gestión de identidades y accesos (IAM), autenticación multifactor (MFA), registros, monitoreo, vulnerabilidades, segregación de redes, ciclo de vida de desarrollo seguro (SDLC seguro) y protección de aplicaciones.",
         "defensa": "este capítulo concentra muchos controles operativos y por eso es clave para explicar brechas técnicas, monitoreo, vulnerabilidades y seguridad de aplicaciones.",
     },
 }
@@ -71,7 +71,7 @@ def render_graph_guide(result: MetricResult, guides: list[ChartGuide]) -> str:
     lines = [
         "# Guía de gráficos del tablero",
         "",
-        "Esta guía explica cada gráfico visual del tablero de TecnoHogar. Cada screenshot se genera desde las mismas funciones Plotly que usa Streamlit, por eso sirve como plan B para la defensa si la demo en vivo falla.",
+        "Esta guía explica cada gráfico visual del tablero de TecnoHogar. Cada screenshot se genera desde las mismas funciones Plotly que usa Streamlit, por eso sirve como plan B para la defensa si la demo en vivo falla. Si aparece una sigla, buscarla en `glosario-abreviaturas.md`.",
         "",
         f"Valores base del caso: **{resumen['controles_evaluados']} controles**, **{resumen['madurez_global_pct']}% madurez**, **{resumen['brecha_global_pct']}% brecha**, **{resumen['proyectos']} iniciativas**, **{resumen['quick_wins']} quick wins** y **{effort} jornadas**.",
         "",
@@ -113,11 +113,12 @@ Este directorio es el paquete de estudio para defender el tablero de control de 
 
 ## Orden recomendado
 
-1. Leer `conceptos-clave.md` para repasar la teoría mínima: métricas, KPI/KGI, CMMI, brecha, riesgo, CID, quick wins y trazabilidad.
-2. Leer `iso-27002-guia.md` para estudiar la norma aplicada, los capítulos 5 a 8 y cómo se usaron en TecnoHogar.
-3. Leer `narrativa-presentacion.md` para practicar la historia slide por slide.
-4. Leer `guia-graficos.md` para entender qué dice cada gráfico y cómo responder preguntas.
-5. Leer `demo-en-vivo.md` para practicar el recorrido del tablero y preparar el plan B.
+1. Leer `glosario-abreviaturas.md` para tener a mano qué significa cada sigla o abreviatura.
+2. Leer `conceptos-clave.md` para entender la lógica completa, desde seguridad de la información hasta tablero, brechas y plan.
+3. Leer `iso-27002-guia.md` para estudiar la norma aplicada, los capítulos 5 a 8 y cómo se usaron en TecnoHogar.
+4. Leer `narrativa-presentacion.md` para practicar la historia slide por slide.
+5. Leer `guia-graficos.md` para entender qué dice cada gráfico y cómo responder preguntas.
+6. Leer `demo-en-vivo.md` para practicar el recorrido del tablero y preparar el plan B.
 
 ## Números que conviene recordar
 
@@ -135,6 +136,58 @@ El tablero no es solamente una visualización. Es una forma de convertir el cont
 """
 
 
+def render_glossary() -> str:
+    return """# Glosario de abreviaturas
+
+Esta lista reúne las abreviaturas que aparecen en las notas, el tablero, los datos o la defensa. No hace falta recitarlas todas, pero sí conviene poder explicar las principales si aparecen en una pregunta.
+
+| Abreviatura | Significado | Cómo entenderla en este trabajo |
+| --- | --- | --- |
+| API | Application Programming Interface, interfaz de programación de aplicaciones | Forma en que sistemas o aplicaciones se comunican entre sí. Aparece asociada a seguridad de aplicaciones e integración. |
+| CID | Confidencialidad, Integridad y Disponibilidad | Tres propiedades básicas para valorar activos y controles de seguridad de la información. |
+| CI | Continuous Integration, integración continua | Automatización que valida y construye el proyecto cuando se sube código. |
+| CD | Continuous Delivery/Deployment, entrega o despliegue continuo | Automatización que publica o deja listo el resultado luego de pasar validaciones. En este repo aplica al deploy del tablero y entregables. |
+| CI/CD | Continuous Integration / Continuous Delivery, integración continua y entrega continua | Forma corta de hablar del pipeline completo: validar, construir y publicar resultados automáticamente. |
+| CMMI | Capability Maturity Model Integration | Modelo de madurez usado como escala 0 a 5 para medir qué tan implementado está cada control. |
+| CSF | Critical Success Factor, factor crítico de éxito | Condición clave que debe cumplirse para que la gestión de seguridad funcione. |
+| CSV | Comma-Separated Values, valores separados por coma | Formato simple de datos tabulares usado como fuente del tablero. |
+| HTML | HyperText Markup Language | Formato web usado para algunas salidas, como slides Reveal.js o informe HTML. |
+| IAM | Identity and Access Management, gestión de identidades y accesos | Prácticas y herramientas para administrar usuarios, permisos y autenticación. |
+| IEC | International Electrotechnical Commission | Organismo internacional que publica normas junto con ISO. |
+| ISO | International Organization for Standardization | Organización internacional de normalización. En el trabajo se usa la familia ISO/IEC 27000. |
+| ISO/IEC | International Organization for Standardization / International Electrotechnical Commission | Forma conjunta en que se publican normas como ISO/IEC 27001 e ISO/IEC 27002. |
+| KGI | Key Goal Indicator, indicador clave de resultado | Indicador que dice si se alcanzó un objetivo. Ejemplo: madurez global. |
+| KPI | Key Performance Indicator, indicador clave de desempeño | Indicador usado para seguir desempeño o avance. Ejemplo: brecha por capítulo o avance del plan. |
+| KPI/KGI | Key Performance Indicator / Key Goal Indicator | Par de indicadores usado para separar seguimiento del desempeño y resultado final esperado. |
+| MFA | Multi-Factor Authentication, autenticación multifactor | Uso de más de un factor para validar identidad, por ejemplo contraseña más código o aplicación móvil. |
+| PDF | Portable Document Format | Formato final del informe descargable. |
+| PII | Personally Identifiable Information, información de identificación personal | Datos que pueden identificar a una persona. Se vincula con privacidad y protección de datos. |
+| PNG | Portable Network Graphics | Formato de imagen usado para los screenshots de gráficos en las notas. |
+| PPTX | Formato de presentación de Microsoft PowerPoint | Formato final de la presentación descargable. |
+| RRHH | Recursos Humanos | Área/proceso asociado a controles de personas: altas, bajas, capacitación, confidencialidad y desvinculación. |
+| S.A. | Sociedad Anónima | Tipo societario usado en el nombre TecnoHogar S.A. |
+| SDLC | Software Development Life Cycle, ciclo de vida de desarrollo de software | Proceso de diseño, construcción, prueba y mantenimiento de software. En seguridad se habla de SDLC seguro. |
+| SGSI | Sistema de Gestión de Seguridad de la Información | Sistema de gestión para dirigir, medir y mejorar seguridad de la información. ISO 27001 define requisitos para un SGSI. |
+| SI | Seguridad de la Información | Protección de la información y sus propiedades: confidencialidad, integridad y disponibilidad. |
+| SMART | Specific, Measurable, Achievable, Relevant, Time-bound | Criterios para que un indicador sea específico, medible, alcanzable, relevante y temporal. |
+| TIC | Tecnologías de la Información y las Comunicaciones | Sistemas, infraestructura, redes, aplicaciones y servicios tecnológicos. |
+| TP | Trabajo Práctico | Entrega académica de la materia. |
+| URL | Uniform Resource Locator | Dirección web, por ejemplo la URL del tablero Streamlit. |
+| WAF | Web Application Firewall, firewall de aplicaciones web | Control para filtrar y proteger tráfico hacia aplicaciones web. |
+
+## Las siglas más importantes para defender
+
+Si hay poco tiempo, priorizar estas:
+
+- **ISO/IEC 27002:** catálogo de controles usado como referencia.
+- **CMMI:** escala de madurez 0 a 5 que usamos para medir controles.
+- **CID:** confidencialidad, integridad y disponibilidad.
+- **SGSI:** sistema de gestión de seguridad de la información.
+- **KPI/KGI:** indicadores de desempeño y de resultado.
+- **SI:** seguridad de la información.
+"""
+
+
 def render_iso_guide(result: MetricResult) -> str:
     resumen = result.resumen
     controls = result.controles.copy()
@@ -144,7 +197,7 @@ def render_iso_guide(result: MetricResult) -> str:
     lines = [
         "# Guía ISO/IEC 27002:2022 para la defensa",
         "",
-        "Esta guía resume lo que conviene saber de ISO/IEC 27002:2022 para defender el tablero. No reemplaza a la norma oficial: sirve para explicar qué es, qué parte usamos y cómo se tradujo en métricas, brechas y proyectos dentro del caso TecnoHogar.",
+        "Esta guía resume lo que conviene saber de ISO/IEC 27002:2022 para defender el tablero. No reemplaza a la norma oficial: sirve para explicar qué es, qué parte usamos y cómo se tradujo en métricas, brechas y proyectos dentro del caso TecnoHogar. Para siglas y abreviaturas, usar `glosario-abreviaturas.md`.",
         "",
         "## Qué tenés que poder decir en 30 segundos",
         "",
@@ -163,8 +216,8 @@ def render_iso_guide(result: MetricResult) -> str:
         f"- Controles evaluados: **{resumen['controles_evaluados']}**.",
         f"- Capítulos evaluados: **{resumen['capitulos_evaluados']}**.",
         "- Unidad de análisis: cada control ISO es una métrica/control evaluable.",
-        "- Capa de medición agregada por nosotros: nivel CMMI, madurez, brecha, peso, brecha ponderada, hallazgo, evidencia y proyecto asociado.",
-        "- Atributos usados para vistas transversales: tipo preventivo/detectivo/correctivo, CID, funciones de ciberseguridad, capacidades operacionales y dominios ejecutivos.",
+        "- Capa de medición agregada por nosotros: nivel Capability Maturity Model Integration (CMMI), madurez, brecha, peso, brecha ponderada, hallazgo, evidencia y proyecto asociado.",
+        "- Atributos usados para vistas transversales: tipo preventivo/detectivo/correctivo, confidencialidad, integridad y disponibilidad (CID), funciones de ciberseguridad, capacidades operacionales y dominios ejecutivos.",
         "",
         "## Resumen por capítulo",
         "",
@@ -234,14 +287,14 @@ def render_iso_guide(result: MetricResult) -> str:
             "## Cómo convertimos ISO en datos",
             "",
             "1. **Catálogo:** `datos/estandares/iso27002_2022/catalogo_controles.csv` define los controles, capítulo, nombre, propósito, pregunta de evaluación, atributos, peso y mapeos auxiliares.",
-            "2. **Diagnóstico:** `datos/casos/tecnohogar/diagnostico.csv` asigna nivel CMMI, hallazgo, observaciones, fuente y entrevistado por control.",
+            "2. **Diagnóstico:** `datos/casos/tecnohogar/diagnostico.csv` asigna nivel Capability Maturity Model Integration (CMMI), hallazgo, observaciones, fuente y entrevistado por control.",
             "3. **Métrica:** el motor calcula madurez, brecha y brecha ponderada.",
             "4. **Plan:** `datos/casos/tecnohogar/proyectos.csv` define iniciativas, esfuerzo, plazo y aporte esperado.",
             "5. **Trazabilidad:** `datos/casos/tecnohogar/proyecto_control.csv` vincula controles ISO con proyectos concretos.",
             "",
             "## Cómo se relaciona ISO con CMMI",
             "",
-            "ISO 27002 aporta el catálogo y dice **qué controles mirar**. CMMI nos da una escala para expresar **qué tan maduro está cada control**. Por eso no decimos que ISO tenga niveles 0 a 5; esa escala la agregamos nosotros para transformar el catálogo en indicadores de tablero.",
+            "ISO 27002 aporta el catálogo y dice **qué controles mirar**. Capability Maturity Model Integration (CMMI) nos da una escala para expresar **qué tan maduro está cada control**. Por eso no decimos que ISO tenga niveles 0 a 5; esa escala la agregamos nosotros para transformar el catálogo en indicadores de tablero.",
             "",
             "## Qué significa aplicar un control",
             "",
@@ -299,70 +352,259 @@ def render_concepts(result: MetricResult) -> str:
     resumen = result.resumen
     return f"""# Conceptos clave
 
-## Métrica vs medida
+Esta nota está escrita para estudiar desde cero. La idea es entender primero la lógica general y después conectar cada concepto con el tablero de TecnoHogar.
 
-Una **medida** es un dato puntual: por ejemplo, nivel CMMI asignado a un control, peso del control o cantidad de jornadas. Una **métrica** es el cálculo que permite interpretar medidas: por ejemplo, madurez global, brecha ponderada o prioridad de proyecto.
+Para siglas y abreviaturas, leer también `glosario-abreviaturas.md`.
 
-## KPI, KGI y CSF
+## 1. Qué estamos tratando de proteger
 
-Un **KPI** mide desempeño durante la gestión, como avance de proyectos o brecha por capítulo. Un **KGI** mide resultado frente a un objetivo, como la madurez global. Un **CSF** es un factor crítico de éxito: algo que tiene que funcionar para que la gestión de seguridad logre su objetivo.
+La seguridad de la información busca proteger la información que una organización necesita para operar. En TecnoHogar eso incluye datos de clientes, ventas, e-commerce, inventario, proveedores, accesos, sistemas internos y continuidad del negocio.
 
-## Criterios SMART para indicadores
+La forma clásica de explicar esa protección es **CID**:
 
-Un buen indicador debe ser específico, medible, alcanzable, relevante y temporal. En este trabajo los indicadores se apoyan en CSV, fórmulas reproducibles y generación automática para evitar depender de edición manual.
+- **Confidencialidad:** que la información no sea vista por quien no corresponde.
+- **Integridad:** que la información no sea modificada de forma indebida o accidental.
+- **Disponibilidad:** que la información y los sistemas estén accesibles cuando el negocio los necesita.
 
-## Tablero de control de seguridad
+En el TP1 usamos CID para entender activos. En el TP2 usamos controles ISO para medir qué tan protegida está esa información.
 
-Es una herramienta para resumir, priorizar y comunicar el estado de seguridad. Debe permitir una lectura ejecutiva y también bajar al detalle de controles, brechas, evidencias y proyectos.
+## 2. Qué es ISO/IEC 27002:2022 en este trabajo
 
-## CMMI 0 a 5
+**ISO/IEC 27002:2022** es un catálogo de controles de seguridad de la información. No lo usamos como certificación, sino como lista ordenada de cosas que conviene mirar.
+
+La idea simple es:
+
+1. ISO 27002 nos dice **qué controles evaluar**.
+2. El caso TecnoHogar nos da contexto de negocio.
+3. Nosotros asignamos un nivel de madurez a cada control.
+4. El tablero calcula brechas, prioridades y proyectos.
+
+Para TecnoHogar evaluamos **{resumen['controles_evaluados']} controles** de los capítulos:
+
+- **5 - Organizativos:** gobierno, políticas, roles, proveedores, incidentes, continuidad y cumplimiento.
+- **6 - Personas:** empleados, capacitación, confidencialidad, trabajo remoto y desvinculación.
+- **7 - Físicos:** oficinas, accesos físicos, equipos, salas, instalaciones y soportes.
+- **8 - Tecnológicos:** endpoints, accesos, redes, logs, vulnerabilidades, backup, criptografía y desarrollo seguro.
+
+La explicación completa de ISO está en `iso-27002-guia.md`.
+
+## 3. Qué es un control
+
+Un **control** es una práctica, proceso, medida técnica o regla de gestión que ayuda a reducir una exposición de seguridad.
+
+Ejemplos:
+
+- Tener política de seguridad.
+- Revisar accesos de usuarios.
+- Hacer backups.
+- Registrar eventos en logs.
+- Capacitar a empleados.
+- Proteger físicamente oficinas y equipos.
+
+En el tablero, cada control ISO se convirtió en una unidad evaluable. Por eso cuando decimos “93 controles” estamos diciendo que medimos 93 puntos concretos del catálogo.
+
+## 4. Qué significa madurez
+
+La **madurez** responde esta pregunta: “qué tan instalado y controlado está este control en la organización”.
+
+No alcanza con que algo exista de forma informal. Un control maduro debería estar definido, repetirse, tener responsables, evidencia, medición y mejora.
+
+Usamos una escala tipo **CMMI** de 0 a 5:
 
 - **0 - Inexistente:** no hay práctica identificable.
-- **1 - Inicial:** existe de forma informal o reactiva.
-- **2 - Gestionado:** hay práctica repetible pero todavía limitada.
-- **3 - Definido:** existe proceso documentado y consistente.
-- **4 - Cuantitativo:** se mide y controla con indicadores.
-- **5 - Optimizado:** se mejora de forma continua.
+- **1 - Inicial:** existe algo informal o reactivo.
+- **2 - Gestionado:** se hace de forma repetible, pero todavía limitada.
+- **3 - Definido:** hay proceso documentado y más consistente.
+- **4 - Cuantitativo:** se mide con indicadores.
+- **5 - Optimizado:** se revisa y mejora de forma continua.
 
-## Madurez, brecha y brecha ponderada
+Importante para defender: CMMI no es “la ISO”. ISO nos da los controles; CMMI es la escala que usamos para medirlos.
 
-La **madurez** es el nivel actual normalizado. La **brecha** es la distancia hasta el objetivo. La **brecha ponderada** multiplica esa brecha por el peso del control, para que dos controles con igual nivel CMMI no tengan necesariamente la misma prioridad ejecutiva.
+## 5. Qué es una medida y qué es una métrica
+
+Una **medida** es un dato base. Por ejemplo:
+
+- nivel CMMI de un control;
+- peso del control;
+- cantidad de controles evaluados;
+- esfuerzo estimado en jornadas;
+- cantidad de proyectos.
+
+Una **métrica** es un cálculo o lectura que se obtiene usando medidas. Por ejemplo:
+
+- madurez global;
+- brecha global;
+- brecha ponderada;
+- prioridad de proyecto;
+- madurez por capítulo.
+
+Ejemplo simple: si un control tiene nivel CMMI bajo, eso es una medida. Cuando calculamos cuánto falta para llegar al objetivo, eso ya es una métrica de brecha.
+
+## 6. Qué es brecha
+
+La **brecha** es la distancia entre la situación actual y el objetivo esperado.
+
+En el tablero usamos esta idea:
+
+- si un control está muy maduro, la brecha es baja;
+- si un control está poco maduro, la brecha es alta.
 
 En TecnoHogar, la madurez global es **{resumen['madurez_global_pct']}%** y la brecha global es **{resumen['brecha_global_pct']}%**.
 
-## ISO/IEC 27002:2022 capítulos 5, 6, 7 y 8
+Cómo explicarlo en voz alta:
 
-El tablero usa los cuatro capítulos evaluables del catálogo: **5 Organizativos**, **6 Personas**, **7 Físicos** y **8 Tecnológicos**. En total se evaluaron **{resumen['controles_evaluados']} controles**.
+“No estamos diciendo que TecnoHogar no tenga nada. Estamos diciendo que, frente a un objetivo optimizado, todavía falta formalización, medición y mejora continua”.
 
-La forma correcta de explicarlo es: ISO 27002 aporta el **catálogo de controles** y nosotros agregamos una **capa de medición** con CMMI, brecha, ponderación y proyectos. Para estudiar la norma aplicada, leer `iso-27002-guia.md`.
+## 7. Qué es brecha ponderada
 
-## CID
+La **brecha ponderada** evita tratar todos los controles como si pesaran igual.
 
-**Confidencialidad** protege contra acceso no autorizado. **Integridad** protege contra modificación incorrecta. **Disponibilidad** protege la continuidad de acceso y uso. En el TP1 se usó CID para activos; en el TP2 se usa también para leer controles asociados a esas propiedades.
+Dos controles pueden tener la misma brecha porcentual, pero no necesariamente tienen el mismo impacto para el diagnóstico. Por eso multiplicamos la brecha por un peso del control.
 
-## Riesgo, tratamiento y priorización
+Idea simple:
 
-El diagnóstico muestra exposición o debilidad; el tratamiento define qué hacer. La priorización combina brecha, peso, esfuerzo, aporte esperado y plazo. Por eso el plan no se ordena solo por intuición.
+```text
+brecha ponderada = brecha * peso del control
+```
 
-## Pareto de brechas
+Esto ayuda a ordenar prioridades. En vez de mirar solamente “qué control está peor”, miramos “qué control combina mala madurez con mayor peso relativo”.
 
-El Pareto ordena controles por brecha ponderada y muestra el acumulado. Sirve para explicar qué controles concentran mayor impacto de mejora.
+## 8. Qué son KPI, KGI y CSF
 
-## Matriz impacto / esfuerzo
+Estas siglas aparecen mucho cuando se habla de métricas y tablero:
 
-Cruza prioridad contra esfuerzo. El cuadrante de alto impacto y bajo esfuerzo contiene quick wins. Los proyectos de alto impacto y alto esfuerzo suelen ser estratégicos.
+- **KPI - Key Performance Indicator:** indicador clave de desempeño. Sirve para seguir cómo viene la gestión. Ejemplo: brecha por capítulo o avance de proyectos.
+- **KGI - Key Goal Indicator:** indicador clave de resultado. Sirve para ver si se alcanzó un objetivo. Ejemplo: madurez global.
+- **CSF - Critical Success Factor:** factor crítico de éxito. Es algo que debe funcionar para que el objetivo se cumpla. Ejemplo: que haya responsables definidos para sostener el plan.
 
-## Quick win
+Forma fácil de recordarlo:
 
-Un quick win no es una acción menor. Es una acción con buen retorno inicial: impacto alto y esfuerzo relativo bajo frente al resto de la cartera. TecnoHogar tiene **{resumen['quick_wins']} quick wins**.
+- KPI mira el camino.
+- KGI mira el resultado.
+- CSF marca condiciones necesarias para que el camino funcione.
 
-## Trazabilidad control -> evidencia -> proyecto
+## 9. Qué significa SMART
 
-La trazabilidad permite responder de dónde sale cada número y por qué existe cada proyecto. En la defensa, esta es la parte que muestra que el tablero es auditable y no una colección de gráficos sueltos.
+SMART es una regla práctica para armar buenos indicadores:
 
-## SGSI y mejora continua
+- **Specific - específico:** debe decir claramente qué mide.
+- **Measurable - medible:** debe poder calcularse.
+- **Achievable - alcanzable:** debe ser realista.
+- **Relevant - relevante:** debe importar para la gestión.
+- **Time-bound - temporal:** debe poder revisarse en un período.
 
-Un SGSI busca gestionar seguridad de forma sistemática. El tablero puede ser usado como instrumento de mejora continua: medir, priorizar, ejecutar, revisar y ajustar.
+En este repo intentamos que los indicadores sean defendibles porque salen de CSV, fórmulas y generación automática, no de celdas editadas a mano.
+
+## 10. Qué es un tablero de control de seguridad
+
+Un **tablero de control de seguridad** sirve para convertir muchos datos técnicos en una lectura útil para decidir.
+
+Debe permitir dos movimientos:
+
+1. **Subir a una lectura ejecutiva:** madurez global, brecha global, quick wins, plan.
+2. **Bajar al detalle:** capítulo, control, hallazgo, evidencia, proyecto y trazabilidad.
+
+Por eso el tablero no es solamente “gráficos lindos”. Es una herramienta para gobernar seguridad: mirar estado, priorizar, ejecutar y volver a medir.
+
+## 11. Qué es riesgo
+
+El **riesgo** aparece cuando hay algo valioso que puede verse afectado por una amenaza aprovechando una debilidad.
+
+En forma simple:
+
+```text
+activo importante + amenaza + vulnerabilidad = riesgo
+```
+
+El tablero no calcula riesgo formal con probabilidad e impacto monetario. Lo que hace es mostrar señales de exposición: controles débiles, brechas ponderadas y capacidades poco maduras.
+
+Esa lectura ayuda a decidir tratamientos.
+
+## 12. Qué es tratamiento de riesgo
+
+El **tratamiento** es qué hacemos frente a un riesgo o debilidad.
+
+Opciones típicas:
+
+- **Reducir:** implementar controles o mejorar procesos.
+- **Transferir:** pasar parte del impacto a un tercero, por ejemplo seguro o contrato.
+- **Aceptar:** asumir el riesgo si está dentro del apetito de la organización.
+- **Evitar:** dejar de hacer la actividad que genera el riesgo.
+
+En nuestro TP, el foco está en **reducir** brechas mediante proyectos de mejora.
+
+## 13. Qué es Pareto de brechas
+
+El **Pareto** ordena los controles que más explican la brecha ponderada.
+
+Sirve para responder:
+
+“Si no puedo mejorar todo al mismo tiempo, ¿por dónde empiezo?”
+
+En el gráfico, las barras muestran brecha ponderada y la línea muestra acumulado. La idea es encontrar los controles que más aportan al problema total.
+
+## 14. Qué es matriz impacto / esfuerzo
+
+La matriz impacto / esfuerzo ayuda a priorizar proyectos.
+
+- Alto impacto y bajo esfuerzo: **quick win**.
+- Alto impacto y alto esfuerzo: proyecto estratégico.
+- Bajo impacto y bajo esfuerzo: mejora táctica.
+- Bajo impacto y alto esfuerzo: diferir o revisar.
+
+Esto evita que el plan sea una lista arbitraria. Ordena acciones según valor esperado y capacidad de ejecución.
+
+## 15. Qué es un quick win
+
+Un **quick win** no es una acción menor ni cosmética. Es una acción con buen retorno inicial: aporta mucho frente al esfuerzo relativo que requiere.
+
+TecnoHogar tiene **{resumen['quick_wins']} quick wins**.
+
+Cómo explicarlo:
+
+“Elegimos quick wins para mostrar avance temprano y reducir brechas visibles, pero el plan también incluye proyectos más estructurales”.
+
+## 16. Qué es trazabilidad
+
+La **trazabilidad** es poder seguir el camino completo de una decisión.
+
+En el tablero, la cadena es:
+
+```text
+control ISO -> evidencia/hallazgo -> madurez -> brecha -> proyecto
+```
+
+Esto es clave para defender el trabajo. Si el profesor pregunta “¿por qué existe este proyecto?”, la respuesta no debería ser “porque nos pareció”. Debería ser: “porque cubre estos controles, que tienen estas brechas, con estos hallazgos”.
+
+## 17. Qué es SGSI
+
+**SGSI** significa Sistema de Gestión de Seguridad de la Información.
+
+Es una forma organizada de gestionar seguridad: definir alcance, políticas, responsables, controles, medición, revisión y mejora.
+
+El tablero no implementa un SGSI completo, pero sí ayuda a operar una lógica de SGSI:
+
+1. medir estado actual;
+2. detectar brechas;
+3. priorizar acciones;
+4. ejecutar mejoras;
+5. volver a medir.
+
+## 18. Cómo contar todo junto en la defensa
+
+Una forma simple de explicarlo:
+
+“Tomamos el contexto de TecnoHogar y usamos ISO/IEC 27002:2022 como catálogo de controles. A cada control le asignamos una madurez CMMI. Con eso calculamos brechas y brechas ponderadas. Luego vinculamos esas brechas con proyectos de mejora. El tablero permite ver el resumen ejecutivo, bajar al detalle por control y justificar el plan con trazabilidad”.
+
+## 19. Frases cortas para responder preguntas
+
+- **ISO 27002 no certifica:** nos da un catálogo de controles.
+- **CMMI no es la ISO:** es la escala que usamos para medir madurez.
+- **Brecha no significa ausencia total:** significa distancia al objetivo.
+- **Brecha ponderada prioriza mejor:** combina distancia y peso del control.
+- **Quick win no es algo menor:** es alto impacto con esfuerzo relativo bajo.
+- **El tablero no es sólo visual:** sirve para gobernar, priorizar y seguir mejoras.
+- **La trazabilidad defiende el plan:** cada proyecto se conecta con controles y hallazgos.
 """
 
 
@@ -412,6 +654,7 @@ def main() -> int:
     NOTES_DIR.mkdir(parents=True, exist_ok=True)
     export_graphics(result, guides)
     write_file(NOTES_DIR / "README.md", render_readme(result, guides))
+    write_file(NOTES_DIR / "glosario-abreviaturas.md", render_glossary())
     write_file(NOTES_DIR / "narrativa-presentacion.md", narrativa_markdown(result))
     write_file(NOTES_DIR / "guia-graficos.md", render_graph_guide(result, guides))
     write_file(NOTES_DIR / "conceptos-clave.md", render_concepts(result))

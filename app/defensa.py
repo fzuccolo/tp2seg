@@ -74,7 +74,7 @@ def slide_defense_notes(result: MetricResult) -> list[SlideDefense]:
             ],
             [
                 "**Tablero de control**: instrumento para seguimiento, priorización y comunicación de indicadores.",
-                "**ISO/IEC 27002:2022**: catálogo de controles de seguridad de la información.",
+                "**ISO/IEC 27002:2022**: catálogo de controles de seguridad de la información. ISO significa International Organization for Standardization e IEC significa International Electrotechnical Commission.",
             ],
         ),
         SlideDefense(
@@ -102,7 +102,7 @@ def slide_defense_notes(result: MetricResult) -> list[SlideDefense]:
                 ),
             ],
             [
-                "**KGI**: indicador de resultado que expresa si se alcanza un objetivo.",
+                "**KGI - Key Goal Indicator**: indicador de resultado que expresa si se alcanza un objetivo.",
                 "**Brecha**: distancia entre el estado actual y el objetivo de madurez.",
             ],
         ),
@@ -160,7 +160,7 @@ def slide_defense_notes(result: MetricResult) -> list[SlideDefense]:
             [
                 "**Medida**: dato observado o asignado.",
                 "**Métrica**: cálculo o interpretación sobre medidas.",
-                "**KPI**: indicador para seguimiento de desempeño.",
+                "**KPI - Key Performance Indicator**: indicador para seguimiento de desempeño.",
             ],
         ),
         SlideDefense(
@@ -203,7 +203,7 @@ def slide_defense_notes(result: MetricResult) -> list[SlideDefense]:
                 )
             ],
             [
-                "**CMMI 0..5**: inexistente, inicial, gestionado, definido, cuantitativo y optimizado.",
+                "**CMMI - Capability Maturity Model Integration**: escala de madurez usada de 0 a 5: inexistente, inicial, gestionado, definido, cuantitativo y optimizado.",
                 "**Optimizado**: control medido, gestionado y mejorado de forma continua.",
             ],
         ),
@@ -305,7 +305,7 @@ def slide_defense_notes(result: MetricResult) -> list[SlideDefense]:
             ],
             [
                 "**Demo en vivo**: validación de que el tablero es navegable y no solo un entregable estático.",
-                "**CI/CD**: generación reproducible de tablero, informe y presentación.",
+                "**CI/CD - Continuous Integration / Continuous Delivery**: generación reproducible de tablero, informe y presentación.",
             ],
         ),
         SlideDefense(
@@ -364,7 +364,7 @@ def narrativa_markdown(result: MetricResult) -> str:
     sections = [
         "# Narrativa de presentación",
         "",
-        "Esta guía es el guion de defensa para presentar la PPTX y hacer la demo del tablero. La idea no es memorizar palabra por palabra, sino entender el hilo: **TP1 -> medición ISO -> diagnóstico -> brechas -> plan -> trazabilidad**.",
+        "Esta guía es el guion de defensa para presentar la PPTX y hacer la demo del tablero. La idea no es memorizar palabra por palabra, sino entender el hilo: **TP1 -> medición ISO -> diagnóstico -> brechas -> plan -> trazabilidad**. Para siglas y abreviaturas, usar `glosario-abreviaturas.md`.",
         "",
     ]
     for note in slide_defense_notes(result):

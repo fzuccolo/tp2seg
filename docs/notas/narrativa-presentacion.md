@@ -1,6 +1,6 @@
 # Narrativa de presentación
 
-Esta guía es el guion de defensa para presentar la PPTX y hacer la demo del tablero. La idea no es memorizar palabra por palabra, sino entender el hilo: **TP1 -> medición ISO -> diagnóstico -> brechas -> plan -> trazabilidad**.
+Esta guía es el guion de defensa para presentar la PPTX y hacer la demo del tablero. La idea no es memorizar palabra por palabra, sino entender el hilo: **TP1 -> medición ISO -> diagnóstico -> brechas -> plan -> trazabilidad**. Para siglas y abreviaturas, usar `glosario-abreviaturas.md`.
 
 ## Slide 1: Carátula
 
@@ -24,7 +24,7 @@ Esta guía es el guion de defensa para presentar la PPTX y hacer la demo del tab
 **Referencias para tener a mano:**
 
 - **Tablero de control**: instrumento para seguimiento, priorización y comunicación de indicadores.
-- **ISO/IEC 27002:2022**: catálogo de controles de seguridad de la información.
+- **ISO/IEC 27002:2022**: catálogo de controles de seguridad de la información. ISO significa International Organization for Standardization e IEC significa International Electrotechnical Commission.
 
 ## Slide 2: Resumen ejecutivo
 
@@ -52,7 +52,7 @@ Esta guía es el guion de defensa para presentar la PPTX y hacer la demo del tab
 
 **Referencias para tener a mano:**
 
-- **KGI**: indicador de resultado que expresa si se alcanza un objetivo.
+- **KGI - Key Goal Indicator**: indicador de resultado que expresa si se alcanza un objetivo.
 - **Brecha**: distancia entre el estado actual y el objetivo de madurez.
 
 ## Slide 3: Alcance y modelo de datos
@@ -110,7 +110,7 @@ Esta guía es el guion de defensa para presentar la PPTX y hacer la demo del tab
 
 - **Medida**: dato observado o asignado.
 - **Métrica**: cálculo o interpretación sobre medidas.
-- **KPI**: indicador para seguimiento de desempeño.
+- **KPI - Key Performance Indicator**: indicador para seguimiento de desempeño.
 
 ## Slide 5: Madurez por capítulo ISO
 
@@ -157,7 +157,7 @@ Esta guía es el guion de defensa para presentar la PPTX y hacer la demo del tab
 
 **Referencias para tener a mano:**
 
-- **CMMI 0..5**: inexistente, inicial, gestionado, definido, cuantitativo y optimizado.
+- **CMMI - Capability Maturity Model Integration**: escala de madurez usada de 0 a 5: inexistente, inicial, gestionado, definido, cuantitativo y optimizado.
 - **Optimizado**: control medido, gestionado y mejorado de forma continua.
 
 ## Slide 7: Brechas principales
@@ -261,7 +261,7 @@ Esta guía es el guion de defensa para presentar la PPTX y hacer la demo del tab
 **Referencias para tener a mano:**
 
 - **Demo en vivo**: validación de que el tablero es navegable y no solo un entregable estático.
-- **CI/CD**: generación reproducible de tablero, informe y presentación.
+- **CI/CD - Continuous Integration / Continuous Delivery**: generación reproducible de tablero, informe y presentación.
 
 ## Slide 11: Conclusiones y próximos pasos
 

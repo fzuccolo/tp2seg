@@ -2,7 +2,7 @@ from app.datos import load_dataset
 from app.defensa import speaker_note_texts
 from app.graficos import chart_guides
 from app.metricas import compute_metrics
-from scripts.generar_notas import render_iso_guide
+from scripts.generar_notas import render_glossary, render_iso_guide
 
 
 def test_catalogo_graficos_de_defensa_es_completo():
@@ -34,3 +34,13 @@ def test_guia_iso_resume_norma_y_aplicacion():
     assert "ISO 27002 aporta el catálogo" in guide
     assert "CMMI" in guide
     assert "control -> hallazgo -> brecha -> proyecto" in guide
+
+
+def test_glosario_explica_abreviaturas_principales():
+    glossary = render_glossary()
+
+    for value in ["CID", "CI/CD", "CMMI", "CSF", "IAM", "ISO/IEC", "KGI", "KPI", "KPI/KGI", "MFA", "PNG", "RRHH", "SDLC", "SGSI", "SI", "SMART", "WAF"]:
+        assert f"| {value} |" in glossary
+    assert "Confidencialidad, Integridad y Disponibilidad" in glossary
+    assert "Capability Maturity Model Integration" in glossary
+    assert "Sistema de Gestión de Seguridad de la Información" in glossary

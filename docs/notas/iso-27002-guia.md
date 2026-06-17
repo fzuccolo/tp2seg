@@ -1,6 +1,6 @@
 # Guía ISO/IEC 27002:2022 para la defensa
 
-Esta guía resume lo que conviene saber de ISO/IEC 27002:2022 para defender el tablero. No reemplaza a la norma oficial: sirve para explicar qué es, qué parte usamos y cómo se tradujo en métricas, brechas y proyectos dentro del caso TecnoHogar.
+Esta guía resume lo que conviene saber de ISO/IEC 27002:2022 para defender el tablero. No reemplaza a la norma oficial: sirve para explicar qué es, qué parte usamos y cómo se tradujo en métricas, brechas y proyectos dentro del caso TecnoHogar. Para siglas y abreviaturas, usar `glosario-abreviaturas.md`.
 
 ## Qué tenés que poder decir en 30 segundos
 
@@ -19,8 +19,8 @@ ISO/IEC 27002:2022 es un catálogo de controles de seguridad de la información.
 - Controles evaluados: **93**.
 - Capítulos evaluados: **4**.
 - Unidad de análisis: cada control ISO es una métrica/control evaluable.
-- Capa de medición agregada por nosotros: nivel CMMI, madurez, brecha, peso, brecha ponderada, hallazgo, evidencia y proyecto asociado.
-- Atributos usados para vistas transversales: tipo preventivo/detectivo/correctivo, CID, funciones de ciberseguridad, capacidades operacionales y dominios ejecutivos.
+- Capa de medición agregada por nosotros: nivel Capability Maturity Model Integration (CMMI), madurez, brecha, peso, brecha ponderada, hallazgo, evidencia y proyecto asociado.
+- Atributos usados para vistas transversales: tipo preventivo/detectivo/correctivo, confidencialidad, integridad y disponibilidad (CID), funciones de ciberseguridad, capacidades operacionales y dominios ejecutivos.
 
 ## Resumen por capítulo
 
@@ -55,7 +55,7 @@ ISO/IEC 27002:2022 es un catálogo de controles de seguridad de la información.
 
 **Qué cubre:** ciclo de vida laboral, concientización, confidencialidad, trabajo remoto, desvinculación y reporte de eventos.
 
-**Qué aplicamos en TecnoHogar:** se usó para medir prácticas de RRHH y usuarios: screening, términos de empleo, capacitación, acuerdos de confidencialidad, teletrabajo y canales de reporte.
+**Qué aplicamos en TecnoHogar:** se usó para medir prácticas de Recursos Humanos (RRHH) y usuarios: verificación de antecedentes, términos de empleo, capacitación, acuerdos de confidencialidad, teletrabajo y canales de reporte.
 
 **Lectura del tablero:** 8 controles, madurez **37.5%** y brecha **62.5%**.
 
@@ -91,7 +91,7 @@ ISO/IEC 27002:2022 es un catálogo de controles de seguridad de la información.
 
 **Qué cubre:** endpoints, accesos privilegiados, autenticación, malware, vulnerabilidades, configuración, backup, logs, redes, criptografía y desarrollo seguro.
 
-**Qué aplicamos en TecnoHogar:** se usó para medir la postura técnica del e-commerce y la operación: hardening, IAM/MFA, registros, monitoreo, vulnerabilidades, segregación de redes, SDLC seguro y protección de aplicaciones.
+**Qué aplicamos en TecnoHogar:** se usó para medir la postura técnica del e-commerce y la operación: hardening, gestión de identidades y accesos (IAM), autenticación multifactor (MFA), registros, monitoreo, vulnerabilidades, segregación de redes, ciclo de vida de desarrollo seguro (SDLC seguro) y protección de aplicaciones.
 
 **Lectura del tablero:** 34 controles, madurez **36.5%** y brecha **63.5%**.
 
@@ -125,14 +125,14 @@ Estos son los controles que aparecen arriba en el ranking de brecha ponderada. N
 ## Cómo convertimos ISO en datos
 
 1. **Catálogo:** `datos/estandares/iso27002_2022/catalogo_controles.csv` define los controles, capítulo, nombre, propósito, pregunta de evaluación, atributos, peso y mapeos auxiliares.
-2. **Diagnóstico:** `datos/casos/tecnohogar/diagnostico.csv` asigna nivel CMMI, hallazgo, observaciones, fuente y entrevistado por control.
+2. **Diagnóstico:** `datos/casos/tecnohogar/diagnostico.csv` asigna nivel Capability Maturity Model Integration (CMMI), hallazgo, observaciones, fuente y entrevistado por control.
 3. **Métrica:** el motor calcula madurez, brecha y brecha ponderada.
 4. **Plan:** `datos/casos/tecnohogar/proyectos.csv` define iniciativas, esfuerzo, plazo y aporte esperado.
 5. **Trazabilidad:** `datos/casos/tecnohogar/proyecto_control.csv` vincula controles ISO con proyectos concretos.
 
 ## Cómo se relaciona ISO con CMMI
 
-ISO 27002 aporta el catálogo y dice **qué controles mirar**. CMMI nos da una escala para expresar **qué tan maduro está cada control**. Por eso no decimos que ISO tenga niveles 0 a 5; esa escala la agregamos nosotros para transformar el catálogo en indicadores de tablero.
+ISO 27002 aporta el catálogo y dice **qué controles mirar**. Capability Maturity Model Integration (CMMI) nos da una escala para expresar **qué tan maduro está cada control**. Por eso no decimos que ISO tenga niveles 0 a 5; esa escala la agregamos nosotros para transformar el catálogo en indicadores de tablero.
 
 ## Qué significa aplicar un control
 

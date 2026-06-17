@@ -1,6 +1,6 @@
 # Guía de gráficos del tablero
 
-Esta guía explica cada gráfico visual del tablero de TecnoHogar. Cada screenshot se genera desde las mismas funciones Plotly que usa Streamlit, por eso sirve como plan B para la defensa si la demo en vivo falla.
+Esta guía explica cada gráfico visual del tablero de TecnoHogar. Cada screenshot se genera desde las mismas funciones Plotly que usa Streamlit, por eso sirve como plan B para la defensa si la demo en vivo falla. Si aparece una sigla, buscarla en `glosario-abreviaturas.md`.
 
 Valores base del caso: **93 controles**, **38.4% madurez**, **61.6% brecha**, **11 iniciativas**, **3 quick wins** y **604 jornadas**.
 
